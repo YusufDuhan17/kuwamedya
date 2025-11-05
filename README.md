@@ -51,12 +51,15 @@ Bu proje GitHub'da barındırılmaktadır: https://github.com/YusufDuhan17/kuwam
 
 3. **Kurulum Script'ini Çalıştırın:**
    - `setup.bat` dosyasına **çift tıklayın**
-   - Script otomatik olarak:
-     - ✅ Sanal ortam oluşturur
-     - ✅ Tüm paketleri yükler
-     - ✅ `.env` dosyası oluşturur (varsa `.env.example`'dan)
-     - ✅ Veritabanını oluşturur ve örnek verilerle doldurur
+   - Script akıllıca çalışır:
+     - ✅ **Mevcut kurulumları korur** - Zaten kurulu olanları yeniden kurmaz
+     - ✅ Sanal ortam varsa kullanır, yoksa oluşturur
+     - ✅ Paketleri kontrol eder, sadece eksikleri yükler
+     - ✅ `.env` dosyası yoksa oluşturur (varsa dokunmaz)
+     - ✅ Veritabanı yoksa oluşturur ve örnek verilerle doldurur (varsa dokunmaz)
      - ✅ Uygulamayı başlatır ve tarayıcıyı açar
+   
+   **Güvenli:** Mevcut verilerinizi ve kurulumunuzu korur, sadece eksik şeyleri tamamlar.
 
 4. **İlk Giriş:**
    - Tarayıcıda `http://127.0.0.1:5000` açılacak
@@ -69,8 +72,35 @@ Bu proje GitHub'da barındırılmaktadır: https://github.com/YusufDuhan17/kuwam
 
 ### Günlük Kullanım
 
+**`start.bat` Dosyası Nedir ve Ne Yapar?**
+
+`start.bat` dosyası, uygulamayı hızlıca başlatmak için tasarlanmıştır. Bu dosya:
+
+✅ **Sadece Kontrol Yapar, Kurulum Yapmaz:**
+- Sanal ortamın (venv) var olup olmadığını kontrol eder
+- Flask paketinin yüklü olup olmadığını kontrol eder
+- Veritabanının var olup olmadığını kontrol eder
+- **Hiçbir şeyi yeniden kurmaz veya silmez!**
+
+✅ **Güvenli ve Hızlı:**
+- Mevcut kurulumunuzu korur
+- Sadece eksik şeyler varsa uyarır (kurulum yapmaz)
+- Uygulamayı başlatır ve tarayıcıyı otomatik açar
+
+✅ **Nasıl Çalışır:**
+1. Dosyaya çift tıklayın
+2. Script kontrol eder:
+   - Sanal ortam var mı? ✅
+   - Flask yüklü mü? ✅
+   - Veritabanı var mı? ✅
+3. Her şey tamamsa → Uygulama başlar ve tarayıcı açılır
+4. Eksik bir şey varsa → Size uyarı verir ve durur (kurulum yapmaz)
+
+**Kullanım:**
 - `start.bat` dosyasına **çift tıklayın** → Uygulama başlar ve tarayıcı açılır
 - Geliştirme yapıyorsanız: `start_dev.bat` (debug modu aktif)
+
+**Not:** İlk kurulum için önce `setup.bat` dosyasını çalıştırmanız gerekir. `start.bat` sadece günlük kullanım içindir.
 
 ---
 
