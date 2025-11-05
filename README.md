@@ -21,353 +21,125 @@ Bu proje GitHub'da barındırılmaktadır: https://github.com/YusufDuhan17/kuwam
 - pip (Python paket yöneticisi)
 - PostgreSQL (Production için) veya SQLite (Development için)
 
-## 🛠️ Kurulum (Adım Adım Detaylı Rehber)
+## 🛠️ Kurulum
 
-Bu rehber, hiçbir teknik bilgisi olmayan kullanıcılar için hazırlanmıştır. Her adımı sırayla takip edin.
+### Hızlı Kurulum (Windows)
 
----
+1. **Python'u Yükleyin:**
+   - https://www.python.org/downloads/ adresinden Python 3.8+ indirin
+   - Kurulum sırasında **"Add Python to PATH"** seçeneğini işaretleyin ✅
+   - Kurulumdan sonra bilgisayarı yeniden başlatın
 
-### 📥 ÖN HAZIRLIK: Gerekli Programları Yükleyin
-
-#### 1. Python'u Yükleyin
-
-**Python Nedir?**
-- Bu proje Python programlama dili ile yazılmıştır.
-- Python'u yüklemeden projeyi çalıştıramazsınız.
-
-**Nasıl Yüklenir?**
-1. Tarayıcınızda şu adrese gidin: https://www.python.org/downloads/
-2. "Download Python" butonuna tıklayın (en son sürümü indirin, örn: Python 3.11 veya 3.12)
-3. İndirilen dosyayı çalıştırın (örn: `python-3.12.0-amd64.exe`)
-4. **ÖNEMLİ:** Kurulum sırasında **"Add Python to PATH"** seçeneğini işaretleyin! ✅
-5. "Install Now" butonuna tıklayın ve kurulumun bitmesini bekleyin.
-6. Kurulum bittikten sonra bilgisayarınızı yeniden başlatın.
-
-**Kontrol Edin:**
-- Windows'ta: `Win + R` tuşlarına basın, `cmd` yazın ve Enter'a basın.
-- Açılan siyah pencerede (Terminal/Powershell) şu komutu yazın:
-  ```bash
-  python --version
-  ```
-- Ekranda `Python 3.12.0` gibi bir sürüm numarası görünüyorsa başarılı! ✅
-
----
-
-### 🔽 ADIM 1: Projeyi İndirin ve Terminal'i Açın
-
-1. GitHub sayfasına gidin: **https://github.com/YusufDuhan17/kuwamedya**
-2. Sayfanın sağ üst kısmındaki yeşil **"Code"** butonuna tıklayın
-3. Açılan menüden **"Download ZIP"** seçeneğine tıklayın
-4. İndirilen ZIP dosyasını bulun (genellikle İndirilenler klasöründe)
-5. ZIP dosyasına sağ tıklayın ve **"Extract All"** (Tümünü Çıkar) seçin
-6. Çıkarma işlemi tamamlandıktan sonra `kuwamedya` klasörüne gidin
-7. **Terminal'i Açın:**
-   - `kuwamedya` klasörünün içinde boş bir yerde `Shift + Sağ Tık` yapın
-   - Açılan menüden **"PowerShell penceresini burada aç"** veya **"Terminal'i burada aç"** seçeneğine tıklayın
-   - Siyah bir pencere (Terminal/PowerShell) açılacak
-
-**📌 Terminal'de Proje Klasöründe Olduğunuzu Kontrol Edin:**
-- Terminal penceresinde komut satırının sonunda `kuwamedya` yazısını görmelisiniz
-- Örnek: `C:\Users\Kullanici\Desktop\kuwamedya>` veya `PS C:\Users\Kullanici\Desktop\kuwamedya>`
-- Eğer `kuwamedya` yazısını görmüyorsanız:
-  1. Terminal penceresinde şu komutu yazın ve Enter'a basın:
+2. **Projeyi İndirin:**
+   
+   **Yöntem 1: ZIP İndirme (Önerilen - Başlangıç için)**
+   - GitHub sayfasına gidin: https://github.com/YusufDuhan17/kuwamedya
+   - Sağ üstteki yeşil **"Code"** butonuna tıklayın
+   - Açılan menüden **"Download ZIP"** seçeneğine tıklayın
+   - İndirilen ZIP dosyasını bulun (genellikle `İndirilenler` klasöründe)
+   - ZIP dosyasına sağ tıklayın ve **"Tümünü Çıkar"** (Extract All) seçin
+   - Çıkarma işlemi tamamlandıktan sonra `kuwamedya` klasörüne gidin
+   
+   **Yöntem 2: Git Clone (Geliştiriciler için)**
+   - Terminal/PowerShell'i açın
+   - İstediğiniz klasöre gidin (örn: `cd Desktop`)
+   - Şu komutu çalıştırın:
      ```bash
-     cd kuwamedya
+     git clone https://github.com/YusufDuhan17/kuwamedya.git
      ```
-  2. Veya tam yolunu kullanın (Masaüstüne çıkardıysanız):
-     ```bash
-     cd C:\Users\KULLANICI_ADINIZ\Desktop\kuwamedya
-     ```
-     (Not: `KULLANICI_ADINIZ` kısmını kendi Windows kullanıcı adınızla değiştirin)
-  3. Tekrar kontrol edin: Komut satırının sonunda `kuwamedya` görünüyor mu?
+   - `kuwamedya` klasörüne gidin: `cd kuwamedya`
+
+3. **Kurulum Script'ini Çalıştırın:**
+   - `setup.bat` dosyasına **çift tıklayın**
+   - Script otomatik olarak:
+     - ✅ Sanal ortam oluşturur
+     - ✅ Tüm paketleri yükler
+     - ✅ `.env` dosyası oluşturur (varsa `.env.example`'dan)
+     - ✅ Veritabanını oluşturur ve örnek verilerle doldurur
+     - ✅ Uygulamayı başlatır ve tarayıcıyı açar
+
+4. **İlk Giriş:**
+   - Tarayıcıda `http://127.0.0.1:5000` açılacak
+   - Admin paneline giriş yapın:
+     - **Kullanıcı Adı:** `admin`
+     - **Şifre:** `Kuwamedya2025!Admin`
+   - ⚠️ **ÖNEMLİ:** İlk girişten sonra şifrenizi değiştirin!
 
 ---
 
-### 🐍 ADIM 2: Sanal Ortam Oluşturun
+### Günlük Kullanım
 
-**Sanal Ortam Nedir?**
-- Projenin kendi Python paketlerini tutmak için izole bir alan oluşturur.
-- Bilgisayarınızdaki diğer Python projeleriyle karışmaz.
+- `start.bat` dosyasına **çift tıklayın** → Uygulama başlar ve tarayıcı açılır
+- Geliştirme yapıyorsanız: `start_dev.bat` (debug modu aktif)
 
-**Windows'ta Nasıl Yapılır?**
+---
 
-1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
-   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
-   - Örnek: `C:\Users\Kullanici\Desktop\kuwamedya>` veya `PS C:\Users\Kullanici\Desktop\kuwamedya>`
-   - Eğer görünmüyorsa, yukarıdaki "Terminal'de Proje Klasöründe Olduğunuzu Kontrol Edin" bölümündeki adımları takip edin
-2. Şu komutu yazın ve Enter'a basın:
+### Manuel Kurulum (Linux/Mac veya İleri Seviye)
+
+<details>
+<summary>Detaylı kurulum adımları için tıklayın</summary>
+
+1. **Python ve pip yüklü olmalı:**
+   ```bash
+   python --version  # Python 3.8+ olmalı
+   ```
+
+2. **Projeyi klonlayın:**
+   ```bash
+   git clone https://github.com/YusufDuhan17/kuwamedya.git
+   cd kuwamedya
+   ```
+
+3. **Sanal ortam oluşturun:**
    ```bash
    python -m venv venv
+   source venv/bin/activate  # Linux/Mac
+   # veya
+   venv\Scripts\activate  # Windows
    ```
-   - Bu komut `venv` adında bir klasör oluşturur (birkaç saniye sürebilir)
-   - Hata mesajı görmezseniz başarılı! ✅
 
-3. Sanal ortamı aktifleştirin:
-   ```bash
-   venv\Scripts\activate
-   ```
-   - Komut satırının başında `(venv)` yazısı görünüyorsa başarılı! ✅
-   - Örnek: `(venv) C:\Users\Kullanici\Desktop\kuwamedya>`
-
-**Linux/Mac'te:**
-```bash
-python3 -m venv venv
-source venv/bin/activate
-```
-
----
-
-### 📦 ADIM 3: Gerekli Paketleri (Bağımlılıkları) Yükleyin
-
-**Bağımlılık Nedir?**
-- Projenin çalışması için gerekli Python kütüphaneleridir (Flask, SQLAlchemy vb.)
-
-**Nasıl Yüklenir?**
-
-1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
-   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
-
-2. **Sanal ortamın aktif olduğundan emin olun:**
-   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
-   - Örnek: `(venv) C:\Users\Kullanici\Desktop\kuwamedya>`
-   - Eğer `(venv)` görünmüyorsa, şu komutu çalıştırın:
-     ```bash
-     venv\Scripts\activate
-     ```
-3. Şu komutu yazın ve Enter'a basın:
+4. **Paketleri yükleyin:**
    ```bash
    pip install -r requirements.txt
    ```
-   - Bu işlem 2-5 dakika sürebilir (internet hızınıza bağlı)
-   - Ekranda birçok paket yüklendiğini göreceksiniz
-   - En sonda "Successfully installed..." mesajı görünüyorsa başarılı! ✅
-   - Hata alırsanız, önce şu komutu çalıştırın: `pip install --upgrade pip`
 
-**Not:** İlk defa yapıyorsanız bu adım biraz uzun sürebilir, sabırlı olun.
-
----
-
-### ⚙️ ADIM 4: Ortam Değişkenlerini Ayarlayın
-
-**.env Dosyası Nedir?**
-- Projenin gizli ayarlarını (şifreler, veritabanı bağlantısı vb.) tutar.
-- Bu dosya GitHub'a yüklenmez (güvenlik için).
-
-**Nasıl Yapılır?**
-
-1. Proje klasöründe `.env.example` adında bir dosya göreceksiniz
-2. Bu dosyayı kopyalayın ve adını `.env` yapın:
-   - **Windows'ta:**
-     - Dosyayı sağ tıklayın → "Kopyala"
-     - Aynı klasörde boş bir yerde sağ tıklayın → "Yapıştır"
-     - Yeni dosyanın adını `.env` olarak değiştirin (`.env.example` değil!)
-   - **Terminal ile (Kolay Yol):**
-     ```bash
-     copy .env.example .env
-     ```
-     veya (PowerShell'de):
-     ```bash
-     Copy-Item .env.example .env
-     ```
-
-3. `.env` dosyasını bir metin editörü ile açın (Notepad, VS Code, Notepad++ vb.)
-4. Dosyanın içeriği şöyle olmalı:
-   ```env
-   FLASK_ENV=dev
-   SECRET_KEY=your-secret-key-here
-   DEV_DATABASE_URL=sqlite:///instance/kuwamedyadb-dev.db
+5. **.env dosyası oluşturun:**
+   ```bash
+   cp .env.example .env
+   # .env dosyasını düzenleyin ve SECRET_KEY'i değiştirin
    ```
 
-5. **SECRET_KEY'i Değiştirin (Çok Önemli!):**
-   - Terminal'de şu komutu çalıştırın:
-     ```bash
-     python -c "import secrets; print(secrets.token_hex(32))"
-     ```
-   - Ekranda uzun bir harf ve rakam dizisi görünecek (örn: `a1b2c3d4e5f6...`)
-   - Bu diziyi kopyalayın
-   - `.env` dosyasında `SECRET_KEY=your-secret-key-here` satırını bulun
-   - `your-secret-key-here` kısmını silin ve kopyaladığınız gizli anahtarı yapıştırın
-   - Örnek: `SECRET_KEY=a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456`
-
-6. Dosyayı kaydedin ve kapatın.
-
-**ÖNEMLİ:** `.env` dosyasını asla başkalarıyla paylaşmayın! GitHub'a yüklemeyin!
-
----
-
-### 💾 ADIM 5: Veritabanını Oluşturun
-
-**Veritabanı Nedir?**
-- Projenin tüm bilgilerini (kullanıcılar, kurslar, projeler vb.) saklar.
-
-**Nasıl Oluşturulur?**
-
-1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
-   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
-
-2. **Sanal ortamın aktif olduğundan emin olun:**
-   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
-3. Şu komutu yazın ve Enter'a basın:
+6. **Veritabanını oluşturun:**
    ```bash
    flask db upgrade
-   ```
-   - Bu komut veritabanı tablolarını oluşturur
-   - "Running upgrade" mesajları görünüyorsa başarılı! ✅
-   - Hata alırsanız, önce şu komutları sırayla çalıştırın:
-     ```bash
-     flask db init
-     flask db migrate -m "Initial migration"
-     flask db upgrade
-     ```
-
-3. `instance` klasöründe `kuwamedyadb-dev.db` adında bir dosya oluşmuş olmalı (bu veritabanınızdır)
-
----
-
-### 🌱 ADIM 6: Veritabanını Örnek Verilerle Doldurun
-
-**Seed Nedir?**
-- Veritabanını örnek verilerle doldurmak için kullanılır (test için).
-
-**Nasıl Yapılır?**
-
-1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
-   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
-
-2. **Sanal ortamın aktif olduğundan emin olun:**
-   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
-
-3. Terminal'de şu komutu yazın ve Enter'a basın:
-   ```bash
    flask seed
    ```
-   - Bu işlem 30-60 saniye sürebilir
-   - Ekranda birçok "başarıyla eklendi" mesajı göreceksiniz
-   - En sonda "Veritabanı başarıyla tohumlandı" mesajı görünüyorsa başarılı! ✅
 
-**Bu komut ne yapar?**
-- ✅ Admin kullanıcısı oluşturur
-- ✅ Örnek kurslar, dersler ve quizler ekler
-- ✅ Örnek projeler ve personel ekler
-- ✅ Örnek hizmet paketleri ekler
-
-**Varsayılan Admin Giriş Bilgileri:**
-- **Kullanıcı Adı:** `admin`
-- **E-posta:** `admin@kuwamedya.com`
-- **Şifre:** `Kuwamedya2025!Admin`
-- ⚠️ **ÖNEMLİ:** İlk girişten sonra mutlaka şifrenizi değiştirin! (Sidebar'dan "Şifre Değiştir" menüsünü kullanabilirsiniz)
-
----
-
-### 🚀 ADIM 7: Uygulamayı Başlatın
-
-**Uygulamayı Çalıştırma:**
-
-1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
-   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
-
-2. **Sanal ortamın aktif olduğundan emin olun:**
-   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
-   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
-
-3. Terminal'de şu komutu yazın ve Enter'a basın:
+7. **Uygulamayı başlatın:**
    ```bash
    flask run
    ```
-   - Ekranda şu mesajları göreceksiniz:
-     ```
-     * Running on http://127.0.0.1:5000
-     Press CTRL+C to quit
-     ```
-   - Bu, uygulamanın başarıyla çalıştığı anlamına gelir! ✅
 
-5. Tarayıcınızı açın ve şu adrese gidin:
-   ```
-   http://127.0.0.1:5000
-   ```
-   veya
-   ```
-   http://localhost:5000
-   ```
-
-6. Ana sayfa görünüyorsa kurulum başarılı! 🎉
-
-**Uygulamayı Durdurma:**
-- Terminal penceresinde `Ctrl + C` tuşlarına basın
+</details>
 
 ---
 
-### 🎯 HIZLI BAŞLATMA (Tekrar Çalıştırırken)
+### ⚠️ Sık Karşılaşılan Sorunlar
 
-Projeyi bir sonraki sefer çalıştırmak için:
+#### Sorun 1: "python komutu bulunamadı"
+**Çözüm:** Python'u yeniden yükleyin ve "Add Python to PATH" seçeneğini işaretleyin.
 
-1. Proje klasörüne gidin
-2. Terminal'i açın (klasör içinde `Shift + Sağ Tık` → "Terminal'i burada aç")
-3. Şu komutları sırayla çalıştırın:
-   ```bash
-   venv\Scripts\activate
-   flask run
-   ```
+#### Sorun 2: Projeyi başka klasöre taşıdım, hata alıyorum
+**Çözüm:** `setup.bat` dosyasını tekrar çalıştırın. Eski venv'i siler ve yenisini oluşturur.
 
-**Not:** Windows'ta `start.bat` veya `start_dev.bat` dosyalarını çift tıklayarak da başlatabilirsiniz (otomatik olarak yukarıdaki adımları yapar).
-
----
-
-### ⚠️ SIK KARŞILAŞILAN SORUNLAR VE ÇÖZÜMLERİ
-
-#### Sorun 1: "python komutu bulunamadı" veya "'python' is not recognized"
-**Çözüm:**
-- Python'u PATH'e eklemediniz. Python'u yeniden yükleyin ve "Add Python to PATH" seçeneğini işaretleyin.
-- Veya `python3` komutunu deneyin: `python3 -m venv venv`
-
-#### Sorun 2: "pip komutu bulunamadı"
-**Çözüm:**
-- Şu komutu çalıştırın: `python -m pip install -r requirements.txt`
-
-#### Sorun 3: "Port 5000 zaten kullanılıyor"
-**Çözüm:**
-- Farklı bir port kullanın: `flask run --port 5001`
-- Tarayıcıda `http://127.0.0.1:5001` adresine gidin
+#### Sorun 3: Port 5000 zaten kullanılıyor
+**Çözüm:** Farklı bir port kullanın: `flask run --port 5001`
 
 #### Sorun 4: Veritabanı hatası
-**Çözüm:**
-- Veritabanını sıfırlayın:
-  ```bash
-  # instance klasöründeki veritabanı dosyasını silin
-  del instance\kuwamedyadb-dev.db
-  # Yeniden oluşturun
-  flask db upgrade
-  flask seed
-  ```
-
-#### Sorun 5: "ModuleNotFoundError: No module named 'xxx'"
-**Çözüm:**
-- Sanal ortamı aktifleştirdiğinizden emin olun (`(venv)` görünüyor olmalı)
-- Bağımlılıkları yeniden yükleyin: `pip install -r requirements.txt`
+**Çözüm:** `instance\kuwamedyadb-dev.db` dosyasını silin ve `setup.bat`'ı tekrar çalıştırın.
 
 ---
 
-### ✅ Kurulum Kontrol Listesi
-
-Kurulumun başarılı olduğunu kontrol etmek için:
-
-- [ ] Python yüklü ve `python --version` çalışıyor
-- [ ] Proje klasörüne indirildi
-- [ ] Sanal ortam oluşturuldu ve aktif (`(venv)` görünüyor)
-- [ ] `requirements.txt` dosyasındaki paketler yüklendi
-- [ ] `.env` dosyası oluşturuldu ve `SECRET_KEY` değiştirildi
-- [ ] `flask db upgrade` başarıyla çalıştı
-- [ ] `flask seed` başarıyla çalıştı
-- [ ] `flask run` komutu çalışıyor ve tarayıcıda site açılıyor
-- [ ] Admin paneline giriş yapabiliyorsunuz (admin / Kuwamedya2025!Admin)
-
-Hepsi tamamlandıysa, kurulum başarılı! 🎉
 
 ## 🔒 Güvenlik
 
@@ -454,9 +226,6 @@ flask create-admin "İsim" "kullanici_adi" "email@example.com" "sifre"
 - Production için sunucu kurulumu gereklidir
 - Tüm güvenlik ayarları `.env` dosyasında yapılmalıdır
 
-## 🐛 Sorun Giderme
-
-Daha detaylı sorun giderme bilgileri için yukarıdaki **"⚠️ SIK KARŞILAŞILAN SORUNLAR VE ÇÖZÜMLERİ"** bölümüne bakın.
 
 ## 📄 Lisans
 

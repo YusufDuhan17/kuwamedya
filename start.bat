@@ -51,10 +51,9 @@ echo   Durdurmak icin bu pencereyi kapatin veya Ctrl+C basin
 echo ========================================
 echo.
 
-REM 2 saniye bekle ve tarayıcıyı aç
-timeout /t 2 /nobreak >nul
-start http://127.0.0.1:5000
+REM Tarayıcıyı Flask başladıktan sonra açmak için arka planda başlat
+start "" cmd /c "timeout /t 3 /nobreak >nul && start http://127.0.0.1:5000"
 
-REM Flask uygulamasını başlat
+REM Flask uygulamasını başlat (bu komut çalışırken tarayıcı açılacak)
 flask run
 
