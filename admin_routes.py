@@ -155,6 +155,10 @@ def edit_user(user_id):
         try:
             form.populate_obj(user_to_edit)
             
+            # Şifre değiştirme (admin için - mevcut şifre gerektirmez)
+            if form.new_password.data:
+                user_to_edit.set_password(form.new_password.data)
+            
             if form.picture.data:
                 try:
                     picture_file = save_picture(form.picture.data, folder='profile_pics', output_size=(300, 300))
@@ -167,7 +171,10 @@ def edit_user(user_id):
 
             log_activity(current_user._get_current_object(), f"<strong>{user_to_edit.username}</strong> adlı kullanıcının bilgilerini güncelledi.", user_to_edit)
             db.session.commit()
-            flash(f'"{user_to_edit.name}" adlı kullanıcının bilgileri güncellendi.', 'success')
+            if form.new_password.data:
+                flash(f'"{user_to_edit.name}" adlı kullanıcının bilgileri ve şifresi güncellendi.', 'success')
+            else:
+                flash(f'"{user_to_edit.name}" adlı kullanıcının bilgileri güncellendi.', 'success')
             return redirect(url_for('admin.user_list'))
         except Exception as e:
             db.session.rollback()

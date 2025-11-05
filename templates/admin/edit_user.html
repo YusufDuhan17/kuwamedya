@@ -192,6 +192,24 @@ YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
                                 {{ form.social_github(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.social_github.errors else ""), placeholder="https://github.com/kullanici") }}
                                 {% if form.social_github.errors %}<div class="invalid-feedback">{% for error in form.social_github.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
                             </div>
+                            
+                            <!-- Şifre Değiştirme Alanı (Admin için) -->
+                            <hr class="border-secondary my-4">
+                            <div class="alert alert-info mb-3">
+                                <i class="fas fa-shield-alt me-2"></i>
+                                <strong>Şifre Değiştirme:</strong> Kullanıcının şifresini değiştirmek için aşağıdaki alanları doldurun. Boş bırakırsanız şifre değişmez.
+                            </div>
+                            <div class="mb-3">
+                                {{ form.new_password.label(class="form-label") }}
+                                {{ form.new_password(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.new_password.errors else ""), placeholder="Yeni şifre (opsiyonel)") }}
+                                {% if form.new_password.errors %}<div class="invalid-feedback">{% for error in form.new_password.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                                <small class="text-muted">En az 8 karakter, büyük harf, küçük harf ve rakam içermelidir.</small>
+                            </div>
+                            <div class="mb-3">
+                                {{ form.confirm_new_password.label(class="form-label") }}
+                                {{ form.confirm_new_password(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.confirm_new_password.errors else ""), placeholder="Yeni şifreyi tekrar girin") }}
+                                {% if form.confirm_new_password.errors %}<div class="invalid-feedback">{% for error in form.confirm_new_password.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
                         </div>
                     </div>
                 </div>

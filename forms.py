@@ -171,7 +171,18 @@ class AdminUpdateUserForm(UpdateAccountForm): # Adminin başka kullanıcıyı g�
                                 ('Admin', 'Admin (Yönetici)')],
                        validators=[DataRequired()])
     is_active = BooleanField('Hesap Aktif')
+    # Admin için şifre değiştirme (mevcut şifre gerektirmez)
+    new_password = PasswordField('Yeni Şifre (Opsiyonel - Değiştirmek için doldurun)', validators=[Optional(), Length(min=8)])
+    confirm_new_password = PasswordField('Yeni Şifreyi Doğrula', validators=[Optional(), EqualTo('new_password', message='Yeni şifreler eşleşmiyor.')])
+    
     submit = SubmitField('Kullanıcıyı Güncelle') # Buton adı farklı
+    
+    def validate_new_password(self, new_password):
+        if new_password.data:  # Sadece şifre girildiyse kontrol et
+            p = new_password.data
+            if not re.search(r'[A-Z]', p): raise ValidationError("Şifre en az bir büyük harf içermelidir.")
+            if not re.search(r'[a-z]', p): raise ValidationError("Şifre en az bir küçük harf içermelidir.")
+            if not re.search(r'[0-9]', p): raise ValidationError("Şifre en az bir rakam içermelidir.")
 
 
 # ==========================================================================
