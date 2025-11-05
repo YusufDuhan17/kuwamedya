@@ -51,51 +51,35 @@ Bu rehber, hiçbir teknik bilgisi olmayan kullanıcılar için hazırlanmıştı
   ```
 - Ekranda `Python 3.12.0` gibi bir sürüm numarası görünüyorsa başarılı! ✅
 
-#### 2. Git'i Yükleyin (İsteğe Bağlı - Sadece GitHub'dan indirmek için)
-
-**Git Nedir?**
-- Projeyi GitHub'dan bilgisayarınıza indirmek için kullanılır.
-
-**Nasıl Yüklenir?**
-1. Tarayıcınızda şu adrese gidin: https://git-scm.com/download/win
-2. Otomatik olarak indirme başlar. İndirilen dosyayı çalıştırın.
-3. Kurulum sırasında tüm ayarları varsayılan olarak bırakın, "Next" butonlarına tıklayın.
-4. Kurulum bitince bilgisayarınızı yeniden başlatın.
-
-**Alternatif (Git Olmadan):**
-- Git yüklemeden de projeyi indirebilirsiniz:
-  1. GitHub sayfasına gidin: https://github.com/YusufDuhan17/kuwamedya
-  2. Yeşil "Code" butonuna tıklayın
-  3. "Download ZIP" seçeneğine tıklayın
-  4. İndirilen ZIP dosyasını sağ tıklayıp "Extract All" (Tümünü Çıkar) seçin
-
 ---
 
-### 🔽 ADIM 1: Projeyi İndirin
+### 🔽 ADIM 1: Projeyi İndirin ve Terminal'i Açın
 
-#### Yöntem A: Git ile (Önerilen)
+1. GitHub sayfasına gidin: **https://github.com/YusufDuhan17/kuwamedya**
+2. Sayfanın sağ üst kısmındaki yeşil **"Code"** butonuna tıklayın
+3. Açılan menüden **"Download ZIP"** seçeneğine tıklayın
+4. İndirilen ZIP dosyasını bulun (genellikle İndirilenler klasöründe)
+5. ZIP dosyasına sağ tıklayın ve **"Extract All"** (Tümünü Çıkar) seçin
+6. Çıkarma işlemi tamamlandıktan sonra `kuwamedya` klasörüne gidin
+7. **Terminal'i Açın:**
+   - `kuwamedya` klasörünün içinde boş bir yerde `Shift + Sağ Tık` yapın
+   - Açılan menüden **"PowerShell penceresini burada aç"** veya **"Terminal'i burada aç"** seçeneğine tıklayın
+   - Siyah bir pencere (Terminal/PowerShell) açılacak
 
-1. Windows'ta: `Win + R` tuşlarına basın, `cmd` yazın ve Enter'a basın.
-2. Projeyi indirmek istediğiniz klasöre gidin (örn: Masaüstü):
-   ```bash
-   cd Desktop
-   ```
-3. Projeyi klonlayın:
-   ```bash
-   git clone https://github.com/YusufDuhan17/kuwamedya.git
-   ```
-4. Proje klasörüne girin:
-   ```bash
-   cd kuwamedya
-   ```
-
-#### Yöntem B: ZIP İndirme (Git Olmadan)
-
-1. GitHub sayfasına gidin: https://github.com/YusufDuhan17/kuwamedya
-2. Yeşil "Code" butonuna tıklayın → "Download ZIP" seçin
-3. İndirilen ZIP dosyasını Masaüstüne çıkarın
-4. Çıkarılan `kuwamedya` klasörüne gidin
-5. Klasörün içinde boş bir yerde `Shift + Sağ Tık` yapın → "PowerShell penceresini burada aç" veya "Terminal'i burada aç" seçin
+**📌 Terminal'de Proje Klasöründe Olduğunuzu Kontrol Edin:**
+- Terminal penceresinde komut satırının sonunda `kuwamedya` yazısını görmelisiniz
+- Örnek: `C:\Users\Kullanici\Desktop\kuwamedya>` veya `PS C:\Users\Kullanici\Desktop\kuwamedya>`
+- Eğer `kuwamedya` yazısını görmüyorsanız:
+  1. Terminal penceresinde şu komutu yazın ve Enter'a basın:
+     ```bash
+     cd kuwamedya
+     ```
+  2. Veya tam yolunu kullanın (Masaüstüne çıkardıysanız):
+     ```bash
+     cd C:\Users\KULLANICI_ADINIZ\Desktop\kuwamedya
+     ```
+     (Not: `KULLANICI_ADINIZ` kısmını kendi Windows kullanıcı adınızla değiştirin)
+  3. Tekrar kontrol edin: Komut satırının sonunda `kuwamedya` görünüyor mu?
 
 ---
 
@@ -107,7 +91,10 @@ Bu rehber, hiçbir teknik bilgisi olmayan kullanıcılar için hazırlanmıştı
 
 **Windows'ta Nasıl Yapılır?**
 
-1. Terminal/PowerShell penceresinde proje klasöründe olduğunuzdan emin olun (klasör adı `kuwamedya` görünüyorsa tamam)
+1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
+   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
+   - Örnek: `C:\Users\Kullanici\Desktop\kuwamedya>` veya `PS C:\Users\Kullanici\Desktop\kuwamedya>`
+   - Eğer görünmüyorsa, yukarıdaki "Terminal'de Proje Klasöründe Olduğunuzu Kontrol Edin" bölümündeki adımları takip edin
 2. Şu komutu yazın ve Enter'a basın:
    ```bash
    python -m venv venv
@@ -137,8 +124,18 @@ source venv/bin/activate
 
 **Nasıl Yüklenir?**
 
-1. Sanal ortamın aktif olduğundan emin olun (komut satırında `(venv)` görünüyor olmalı)
-2. Şu komutu yazın ve Enter'a basın:
+1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
+   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
+
+2. **Sanal ortamın aktif olduğundan emin olun:**
+   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
+   - Örnek: `(venv) C:\Users\Kullanici\Desktop\kuwamedya>`
+   - Eğer `(venv)` görünmüyorsa, şu komutu çalıştırın:
+     ```bash
+     venv\Scripts\activate
+     ```
+3. Şu komutu yazın ve Enter'a basın:
    ```bash
    pip install -r requirements.txt
    ```
@@ -206,8 +203,14 @@ source venv/bin/activate
 
 **Nasıl Oluşturulur?**
 
-1. Terminal'de hala proje klasöründe ve sanal ortam aktif durumda olduğunuzdan emin olun
-2. Şu komutu yazın ve Enter'a basın:
+1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
+   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
+
+2. **Sanal ortamın aktif olduğundan emin olun:**
+   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
+3. Şu komutu yazın ve Enter'a basın:
    ```bash
    flask db upgrade
    ```
@@ -231,7 +234,15 @@ source venv/bin/activate
 
 **Nasıl Yapılır?**
 
-1. Terminal'de şu komutu yazın ve Enter'a basın:
+1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
+   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
+
+2. **Sanal ortamın aktif olduğundan emin olun:**
+   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
+
+3. Terminal'de şu komutu yazın ve Enter'a basın:
    ```bash
    flask seed
    ```
@@ -257,8 +268,15 @@ source venv/bin/activate
 
 **Uygulamayı Çalıştırma:**
 
-1. Terminal'de hala proje klasöründe ve sanal ortam aktif durumda olduğunuzdan emin olun
-2. Şu komutu yazın ve Enter'a basın:
+1. **Terminal'de proje klasöründe olduğunuzdan emin olun:**
+   - Komut satırının sonunda `kuwamedya` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `cd kuwamedya` komutunu çalıştırın
+
+2. **Sanal ortamın aktif olduğundan emin olun:**
+   - Komut satırının başında `(venv)` yazısı görünüyor olmalı
+   - Eğer görünmüyorsa: `venv\Scripts\activate` komutunu çalıştırın
+
+3. Terminal'de şu komutu yazın ve Enter'a basın:
    ```bash
    flask run
    ```
@@ -269,7 +287,7 @@ source venv/bin/activate
      ```
    - Bu, uygulamanın başarıyla çalıştığı anlamına gelir! ✅
 
-3. Tarayıcınızı açın ve şu adrese gidin:
+5. Tarayıcınızı açın ve şu adrese gidin:
    ```
    http://127.0.0.1:5000
    ```
@@ -278,7 +296,7 @@ source venv/bin/activate
    http://localhost:5000
    ```
 
-4. Ana sayfa görünüyorsa kurulum başarılı! 🎉
+6. Ana sayfa görünüyorsa kurulum başarılı! 🎉
 
 **Uygulamayı Durdurma:**
 - Terminal penceresinde `Ctrl + C` tuşlarına basın
@@ -371,7 +389,7 @@ Hepsi tamamlandıysa, kurulum başarılı! 🎉
    - `SESSION_COOKIE_SECURE = True` ayarı zaten yapılmış
 
 4. **Admin Şifresini Değiştirin:**
-   - İlk girişten sonra admin şifresini mutlaka değiştirin
+   - İlk girişten sonra admin şifresini mutlaka değiştirin (Sidebar'dan "Şifre Değiştir" menüsünü kullanın)
    - Güçlü bir şifre kullanın (en az 12 karakter, büyük/küçük harf, sayı, özel karakter)
 
 ## 📁 Proje Yapısı
@@ -438,21 +456,7 @@ flask create-admin "İsim" "kullanici_adi" "email@example.com" "sifre"
 
 ## 🐛 Sorun Giderme
 
-### Veritabanı Hatası
-
-```bash
-# Veritabanını sıfırlamak için
-rm instance/kuwamedyadb-dev.db
-flask db upgrade
-flask seed
-```
-
-### Port Zaten Kullanılıyor
-
-```bash
-# Farklı bir port kullanın
-flask run --port 5001
-```
+Daha detaylı sorun giderme bilgileri için yukarıdaki **"⚠️ SIK KARŞILAŞILAN SORUNLAR VE ÇÖZÜMLERİ"** bölümüne bakın.
 
 ## 📄 Lisans
 
