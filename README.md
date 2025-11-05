@@ -1,6 +1,10 @@
 # KUWAMEDYA - Dijital Ajans Web Sitesi
 
-Modern ve kapsamlı bir dijital ajans web sitesi. Flask tabanlı, tam özellikli bir yönetim paneli ve akademi sistemi içerir.
+Flask tabanlı dijital ajans web sitesi. Tam özellikli yönetim paneli ve akademi sistemi içerir.
+
+## 📦 Proje
+
+Bu proje GitHub'da barındırılmaktadır: https://github.com/YusufDuhan17/kuwamedya
 
 ## 🚀 Özellikler
 
@@ -179,53 +183,11 @@ flask seed
 flask create-admin "İsim" "kullanici_adi" "email@example.com" "sifre"
 ```
 
-## 🌐 Production Deployment
+## 📝 Notlar
 
-### 1. Sunucu Gereksinimleri
-
-- Python 3.8+
-- PostgreSQL veya MySQL
-- Nginx (reverse proxy için)
-- Gunicorn veya uWSGI (WSGI server)
-
-### 2. Adımlar
-
-1. **Gerekli Paketleri Yükleyin:**
-   ```bash
-   pip install gunicorn
-   ```
-
-2. **Ortam Değişkenlerini Ayarlayın:**
-   ```bash
-   export FLASK_ENV=prod
-   export SECRET_KEY=your-production-secret-key
-   export DATABASE_URL=postgresql://...
-   ```
-
-3. **Veritabanını Oluşturun:**
-   ```bash
-   flask db upgrade
-   flask seed  # İsterseniz
-   ```
-
-4. **Gunicorn ile Çalıştırın:**
-   ```bash
-   gunicorn -w 4 -b 0.0.0.0:8000 "app:create_app()"
-   ```
-
-5. **Nginx Yapılandırması:**
-   ```nginx
-   server {
-       listen 80;
-       server_name yourdomain.com;
-
-       location / {
-           proxy_pass http://127.0.0.1:8000;
-           proxy_set_header Host $host;
-           proxy_set_header X-Real-IP $remote_addr;
-       }
-   }
-   ```
+- Bu proje local development için hazırlanmıştır
+- Production için sunucu kurulumu gereklidir
+- Tüm güvenlik ayarları `.env` dosyasında yapılmalıdır
 
 ## 🐛 Sorun Giderme
 
