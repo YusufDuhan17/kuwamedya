@@ -1,0 +1,478 @@
+<!DOCTYPE html>
+<html lang="tr" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- ===================================================================
+    Kuwamedya - Ana İskelet (layout.html)
+    Sürüm: v6.1 (Akademi Yükseltmesi - Hata Düzeltmesi)
+    
+    YENİLİKLER VE GÜÇLENDİRMELER (v6.1):
+    1.  HATA DÜZELTMESİ (UndefinedError - KRİTİK):
+        - 404/500 hatası alındığında 'request.endpoint' 'None' (boş)
+          dönüyordu. Bu durum, 'if request.endpoint.startswith(...)'
+          kodunun çökmesine ve hata sayfasının bile gösterilememesine
+          neden oluyordu.
+        - KOD DÜZELTMESİ:
+          Tüm 'request.endpoint == ...' kontrolleri,
+          'if request.endpoint and request.endpoint == ...'
+          şeklinde "None" (boş) kontrolü ile güvenli hale getirildi.
+        - Bu, 'None' has no attribute 'startswith' hatasını düzeltir.
+    
+    2.  V6.0 GÜNCELLEMESİ (AKILLI PANEL LİNKİ):
+        - Giriş yapan kullanıcının "Profilim" linki, "Kontrol Paneli"
+          olarak değiştirildi ve 'admin.dashboard' rotasına bağlandı.
+        - 'admin.dashboard' rotası (admin_routes.py v6.2'de),
+          kullanıcıyı rolüne göre (Admin/Personel -> Panel,
+          Kullanıcı -> Akademi) otomatik yönlendiren bir dağıtıcıdır.
+    =================================================================== -->
+    
+    <!-- SEO Meta Etiketleri -->
+    <title>{% block title %}Kuwamedya{% endblock %}</title>
+    <meta name="description" content="{% block description %}Kuwamedya - Dijital Pazarlama, Web Yazılım ve Personel Temini çözümleri.{% endblock %}">
+    <meta name="keywords" content="dijital pazarlama, web yazılım, seo, sosyal medya yönetimi, personel temini, kuwamedya">
+    <meta name="author" content="Kuwamedya">
+
+    <!-- Favicon -->
+    <link rel="icon" href="{{ url_for('static', filename='favicon.ico') }}" type="image/x-icon">
+    
+    <!-- Bootstrap CSS (CDN) -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" xintegrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    
+    <!-- Font Awesome (İkonlar için CDN) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" xintegrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    
+    <!-- AOS (Animasyonlar için CDN) -->
+    <link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+    
+    <!-- Ana (Custom) Stil Dosyamız -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+
+    <!-- Her sayfanın kendine özel CSS ekleyebileceği blok -->
+    {% block head_extra %}{% endblock %}
+</head>
+<body data-bs-theme="light" id="main-body" class="light-theme">
+
+    <!-- BOOTSTRAP İKONLARI (SVG SPRITE) -->
+    <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+        <symbol id="check-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </symbol>
+        <symbol id="info-circle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/>
+        </symbol>
+        <symbol id="exclamation-triangle-fill" fill="currentColor" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+        </symbol>
+    </svg>
+
+    <!-- SAYFA YÜKLENİYOR ANİMASYONU (PRELOADER) -->
+    <div id="preloader">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ÜST MENÜ (HEADER / NAVBAR) -->
+    <header class="navbar navbar-expand-lg fixed-top shadow-sm main-navbar" data-bs-theme="light">
+        <div class="container">
+            <a class="navbar-brand fw-bold d-flex align-items-center" href="{{ url_for('main.home') }}">
+                <img src="{{ url_for('static', filename='images/logo.png') }}" alt="KUWAMEDYA" height="28" class="me-2" style="object-fit: contain;">
+                <span class="brand-text">KUWAMEDYA</span>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item">
+                        <!-- GÜNCELLEME (v6.1): 'request.endpoint' 'None' (boş) olabilir diye 'and' eklendi -->
+                        <a class="nav-link {% if request.endpoint and request.endpoint == 'main.home' %}active{% endif %}" href="{{ url_for('main.home') }}">Ana Sayfa</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint == 'main.portfolio' %}active{% endif %}" href="{{ url_for('main.portfolio') }}">Portfolyo</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint == 'main.packages' %}active{% endif %}" href="{{ url_for('main.packages') }}">Hizmetler</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.endpoint and request.endpoint == 'main.personnel_list' %}active{% endif %}" href="{{ url_for('main.personnel_list') }}">Ekibimiz</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" data-bs-toggle="modal" data-bs-target="#kapsulEventModal">Kapsül Event</a>
+                    </li>
+                     <li class="nav-item">
+                        <!-- GÜNCELLEME (v6.1): 'request.endpoint' 'None' (boş) olabilir diye 'and' eklendi -->
+                        <a class="nav-link {% if request.endpoint and request.endpoint.startswith('academy.') %}active{% endif %}" 
+                           href="{{ url_for('academy.academy_home') }}">Akademi</a>
+                    </li>
+                    
+                    <li class="nav-item">
+                        <button class="btn btn-link nav-link p-0 ms-2" id="theme-toggle" title="Tema Değiştir">
+                            <i class="fas fa-moon" id="theme-icon"></i>
+                        </button>
+                    </li>
+                    {% if current_user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="navbarDropdownUser" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                <img src="{{ current_user.avatar(30) }}" alt="{{ current_user.username }}" class="rounded-circle me-2" width="30" height="30" style="object-fit: cover;">
+                                {{ current_user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end" aria-labelledby="navbarDropdownUser">
+                                <!-- 
+                                  GÜNCELLEME (v6.0):
+                                  Bu link artık rol bazlı akıllı yönlendirici olan
+                                  'admin.dashboard' rotasına gider.
+                                -->
+                                {% if current_user.is_staff %}
+                                <li>
+                                    <a class="dropdown-item" href="{{ url_for('admin.dashboard') }}">
+                                        <i class="fas fa-tachometer-alt fa-fw me-2"></i>Kontrol Paneli
+                                    </a>
+                                </li>
+                                {% endif %}
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{{ url_for('auth.logout') }}"><i class="fas fa-sign-out-alt fa-fw me-2"></i> Çıkış Yap</a></li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <!-- Ziyaretçi (Giriş Yapılmamış) -->
+                        <li class="nav-item ms-lg-3 mt-3 mt-lg-0">
+                            <a class="btn btn-outline-primary btn-sm px-3" href="{{ url_for('auth.login') }}">Giriş Yap</a>
+                        </li>
+                        <li class="nav-item ms-lg-2 mt-2 mt-lg-0 mb-2 mb-lg-0">
+                             <a class="btn btn-primary btn-sm px-3" href="{{ url_for('auth.register') }}">Kayıt Ol</a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+    </header>
+
+    <!-- ANA İÇERİK ALANI -->
+    <main role="main" class="main-content-wrapper">
+        
+        {% include 'flash_messages.html' %}
+        
+        {% block content %}{% endblock %}
+    </main>
+
+    <!-- Kapsül Event Modal (Global - Her sayfadan erişilebilir) -->
+    <!-- Kapsül Event Modal - Tüm Sayfalarda Çalışır -->
+    <div class="modal fade" id="kapsulEventModal" tabindex="-1" aria-labelledby="kapsulEventModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-scrollable">
+            <div class="modal-content bg-dark text-white border-secondary">
+                <div class="modal-header border-secondary bg-primary">
+                    <h5 class="modal-title fw-bold" id="kapsulEventModalLabel">
+                        <i class="fas fa-calendar-alt me-2"></i>Kapsül Event - Profesyonel Organizasyon ve Etkinlik Yönetimi
+                    </h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+                </div>
+                <div class="modal-body p-5">
+                    <!-- Tanıtım Metni -->
+                    <div class="row mb-4">
+                        <div class="col-md-12">
+                            <p class="lead text-primary mb-4">
+                                <i class="fas fa-quote-left me-2"></i>
+                                Müşterilerimize en iyisini sunmak için her zaman titiz bir şekilde çalışıyoruz. İki yıllık tecrübemizle farklı sektörlerde başarılı organizasyon ve etkinlik yönetimi hizmetleri sunuyoruz.
+                                <i class="fas fa-quote-right ms-2"></i>
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Hizmetler ve Referanslar -->
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-darker border-primary h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold text-primary mb-4">
+                                        <i class="fas fa-users-cog me-2"></i>Sunduğumuz Hizmetler
+                                    </h5>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-3 d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Personel Hizmetleri</strong>
+                                                <small class="text-muted">Kalıcı ve geçici iş gücü temini, işe alım desteği, insan kaynakları çözümleri.</small>
+                                            </div>
+                                        </li>
+                                        <li class="mb-3 d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Organizasyon ve Etkinlik Yönetimi</strong>
+                                                <small class="text-muted">Lansman, açılış, kurumsal toplantılar, gala ve ödül törenleri.</small>
+                                            </div>
+                                        </li>
+                                        <li class="mb-3 d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Etkinlik Personeli</strong>
+                                                <small class="text-muted">Hostes, karşılama ekibi, saha personeli, VIP misafir yönetimi.</small>
+                                            </div>
+                                        </li>
+                                        <li class="d-flex align-items-start">
+                                            <i class="fas fa-check-circle text-success me-3 mt-1"></i>
+                                            <div>
+                                                <strong class="d-block mb-1">Proje Organizasyonu</strong>
+                                                <small class="text-muted">Organizasyonlarınızın sizi en iyi şekilde temsil etmesini sağlama.</small>
+                                            </div>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-darker border-warning h-100">
+                                <div class="card-body p-4">
+                                    <h5 class="fw-bold text-warning mb-4">
+                                        <i class="fas fa-trophy me-2"></i>Projelerimiz (Referanslar)
+                                    </h5>
+                                    <p class="text-muted mb-3">Son 2 yılda farklı alanlarda başarılı projelere imza attık:</p>
+                                    <ul class="list-unstyled mb-0">
+                                        <li class="mb-2"><i class="fas fa-star text-warning me-2"></i><strong>Kurumsal Etkinlikler:</strong> Şirket içi motivasyon günleri, yıl sonu kutlamaları ve gala geceleri.</li>
+                                        <li class="mb-2"><i class="fas fa-star text-warning me-2"></i><strong>Lansman & Açılışlar:</strong> Yeni ürün tanıtımları, mağaza açılışları ve marka lansman organizasyonları.</li>
+                                        <li class="mb-2"><i class="fas fa-star text-warning me-2"></i><strong>Fuar & Kongreler:</strong> Ulusal ve uluslararası fuarlarda stand kurulumu, katılımcı desteği ve etkinlik yönetimi.</li>
+                                        <li class="mb-2"><i class="fas fa-star text-warning me-2"></i><strong>Sosyal Etkinlikler:</strong> Üniversite festivalleri, topluluk etkinlikleri ve sponsorluk organizasyonları.</li>
+                                        <li class="mb-0"><i class="fas fa-star text-warning me-2"></i><strong>Personel Projeleri:</strong> Perakende, inşaat ve lojistik sektörlerinde saha personeli temini.</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- SSS Bölümü - Accordion -->
+                    <div class="row mb-4">
+                        <div class="col-12">
+                            <h4 class="fw-bold text-white mb-4">
+                                <i class="fas fa-question-circle me-2 text-primary"></i>Sıkça Sorulan Sorular
+                            </h4>
+                            
+                            <!-- Accordion -->
+                            <div class="accordion accordion-flush" id="kapsulEventFAQ">
+                                <!-- Müşterilerin Soruları -->
+                                <div class="accordion-item bg-darker border-secondary mb-2">
+                                    <h2 class="accordion-header" id="headingMusteri">
+                                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseMusteri" aria-expanded="false" aria-controls="collapseMusteri">
+                                            <i class="fas fa-building me-2 text-primary"></i>Müşterilerin Sorabileceği Sorular
+                                        </button>
+                                    </h2>
+                                    <div id="collapseMusteri" class="accordion-collapse collapse" aria-labelledby="headingMusteri" data-bs-parent="#kapsulEventFAQ">
+                                        <div class="accordion-body bg-dark text-white">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Hangi sektörlere personel temini yapıyorsunuz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Perakende, inşaat, lojistik, etkinlik ve kurumsal organizasyonlar başta olmak üzere farklı sektörlere hem kalıcı hem de geçici personel temini yapıyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Organizasyon hizmetleriniz neleri kapsıyor?</strong></h6>
+                                                    <p class="small text-muted mb-3">Lansman, açılış, gala geceleri, kurumsal toplantılar, fuar & kongreler ve sosyal etkinliklerin planlama, yönetim ve uygulama süreçlerini uçtan uca yürütüyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Etkinlik personeli temin edebiliyor musunuz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet. Hostes, karşılama ekibi, saha personeli ve VIP misafir yönetimi gibi etkinlik personeli hizmeti sağlıyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Kaç kişilik ekip gönderebilirsiniz?</strong></h6>
+                                                    <p class="small text-muted mb-3">İhtiyacınıza göre 1 kişiden 100 kişiye kadar ekip sağlayabiliriz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Ödemeleri nasıl yapıyoruz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Sözleşme sonrası banka havalesi ya da fatura karşılığı ödeme alıyoruz.</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Etkinliklerde teknoloji desteği veriyor musunuz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet. Organizasyonlarımızı teknolojik altyapılarla güçlendiriyor, yaratıcı konseptler ve yenilikçi çözümler sunuyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Etkinlik günü acil personel lazım olursa destek verebilir misiniz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet, hızlı şekilde yönlendirme yapabiliyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Hostesleriniz yabancı dil biliyor mu?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet, talebe göre İngilizce ve diğer dilleri bilen personel sağlayabiliyoruz.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Personeliniz eğitimli mi?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet, tüm personelimiz deneyimli ve önceden bilgilendirilmiş şekilde gelir.</p>
+                                                    
+                                                    <h6 class="text-primary mb-2"><i class="fas fa-check me-2"></i><strong>Bize raporlama yapıyor musunuz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet, etkinlik sonrası detaylı bir geri bildirim raporu sunabiliyoruz.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Personelin Soruları -->
+                                <div class="accordion-item bg-darker border-secondary mb-2">
+                                    <h2 class="accordion-header" id="headingPersonel">
+                                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapsePersonel" aria-expanded="false" aria-controls="collapsePersonel">
+                                            <i class="fas fa-user-tie me-2 text-success"></i>Personelin Sorabileceği Sorular
+                                        </button>
+                                    </h2>
+                                    <div id="collapsePersonel" class="accordion-collapse collapse" aria-labelledby="headingPersonel" data-bs-parent="#kapsulEventFAQ">
+                                        <div class="accordion-body bg-dark text-white">
+                                            <div class="row g-3">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Çalışma şekliniz nedir?</strong></h6>
+                                                    <p class="small text-muted mb-3">Hem geçici hem de kalıcı iş fırsatları sunuyoruz. Proje bazlı veya uzun vadeli işlerde görev alabilirsiniz.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Hangi alanlarda çalışma fırsatları var?</strong></h6>
+                                                    <p class="small text-muted mb-3">Etkinlik personeli (hostes, saha ekibi, VIP yönetimi), operasyon destek personeli, lojistik, inşaat ve perakende sektöründe farklı pozisyonlarda iş imkânı sağlıyoruz.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Ödemeler nasıl yapılıyor?</strong></h6>
+                                                    <p class="small text-muted mb-3">Çalıştığınız projeye göre ödemeler düzenli ve zamanında yapılır. Sözleşme öncesinde ödeme şartları net olarak paylaşılır.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Ne zaman işe başlayabilirim?</strong></h6>
+                                                    <p class="small text-muted mb-3">Başvurunuz onaylandığında size uygun ilk projede hemen başlayabilirsiniz.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Günlük ödeme var mı?</strong></h6>
+                                                    <p class="small text-muted mb-3">Çoğu projede haftalık ya da aylık ödeme yapıyoruz, bazı kısa projelerde günlük ödeme de olabiliyor.</p>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Etkinliklerde görev alacak personelden beklentileriniz neler?</strong></h6>
+                                                    <p class="small text-muted mb-3">Profesyonellik, güler yüz, iletişim becerisi, zamanında katılım ve verilen görevleri eksiksiz yerine getirmek öncelikli beklentilerimizdir.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Sık sık iş imkânı oluyor mu?</strong></h6>
+                                                    <p class="small text-muted mb-3">Evet. Yıl boyunca farklı sektörlerde düzenlenen etkinlikler ve projeler sayesinde sürekli iş fırsatları sağlanıyor.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Etkinlik kaç saat sürüyor?</strong></h6>
+                                                    <p class="small text-muted mb-3">Ortalama 6-8 saat sürüyor ama proje bazlı olarak değişebilir.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Kıyafetleri biz mi temin ediyoruz?</strong></h6>
+                                                    <p class="small text-muted mb-3">Hayır, genelde biz veriyoruz. Özel bir kıyafet gerekirse önceden bilgilendiriyoruz.</p>
+                                                    
+                                                    <h6 class="text-success mb-2"><i class="fas fa-check me-2"></i><strong>Yol ve yemek karşılanıyor mu?</strong></h6>
+                                                    <p class="small text-muted mb-3">Çoğu projede evet, karşılanıyor. Detaylar görevden önce size bildiriliyor.</p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- İşe Alım Süreci -->
+                                <div class="accordion-item bg-darker border-secondary mb-2">
+                                    <h2 class="accordion-header" id="headingIsAlim">
+                                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIsAlim" aria-expanded="false" aria-controls="collapseIsAlim">
+                                            <i class="fas fa-briefcase me-2 text-info"></i>İşe Alım Süreci Hakkında
+                                        </button>
+                                    </h2>
+                                    <div id="collapseIsAlim" class="accordion-collapse collapse" aria-labelledby="headingIsAlim" data-bs-parent="#kapsulEventFAQ">
+                                        <div class="accordion-body bg-dark text-white">
+                                            <ul class="list-unstyled">
+                                                <li class="mb-3"><i class="fas fa-arrow-right text-info me-2"></i><strong>Hangi pozisyonlarda personel arıyorsunuz?</strong> - Tüm pozisyonlar için detaylı bilgi almak için bizimle iletişime geçin.</li>
+                                                <li class="mb-3"><i class="fas fa-arrow-right text-info me-2"></i><strong>Başvuru süreci nasıl işliyor?</strong> - CV, mülakat ve gerekirse sınav süreçlerini yürütüyoruz. Detaylar için WhatsApp üzerinden iletişime geçebilirsiniz.</li>
+                                                <li class="mb-3"><i class="fas fa-arrow-right text-info me-2"></i><strong>Ne kadar sürede geri dönüş yapıyorsunuz?</strong> - Başvurularınızı en kısa sürede değerlendirip size dönüş yapıyoruz.</li>
+                                                <li class="mb-3"><i class="fas fa-arrow-right text-info me-2"></i><strong>Daha önce tecrübesi olmayan adaylara da şans veriliyor mu?</strong> - Evet, eğitim ve oryantasyon programlarımızla yeni başlayanlara da fırsat sunuyoruz.</li>
+                                                <li class="mb-0"><i class="fas fa-arrow-right text-info me-2"></i><strong>Eğitim veya oryantasyon sağlıyor musunuz?</strong> - Evet, tüm personelimize kapsamlı eğitim ve oryantasyon desteği sağlıyoruz.</li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Çalışma Şartları ve Ücretlendirme -->
+                                <div class="accordion-item bg-darker border-secondary mb-2">
+                                    <h2 class="accordion-header" id="headingCalisma">
+                                        <button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCalisma" aria-expanded="false" aria-controls="collapseCalisma">
+                                            <i class="fas fa-clock me-2 text-warning"></i>Çalışma Şartları ve Ücretlendirme
+                                        </button>
+                                    </h2>
+                                    <div id="collapseCalisma" class="accordion-collapse collapse" aria-labelledby="headingCalisma" data-bs-parent="#kapsulEventFAQ">
+                                        <div class="accordion-body bg-dark text-white">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <h6 class="text-warning mb-3">Çalışma Şartları</h6>
+                                                    <ul class="list-unstyled small">
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Çalışma saatleri projeye göre belirleniyor</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Tam zamanlı, yarı zamanlı ve dönemsel iş imkanları mevcut</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Fazla mesai ücreti ödeniyor</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Görev yerleri değişkenlik gösterebilir</li>
+                                                        <li class="mb-0"><i class="fas fa-check text-warning me-2"></i>Birden fazla projede çalışma imkanı var</li>
+                                                    </ul>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <h6 class="text-warning mb-3">Ücretlendirme ve Haklar</h6>
+                                                    <ul class="list-unstyled small">
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Maaşlar düzenli olarak ödeniyor</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Ödemeler banka hesabına yapılıyor</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Sigorta yapılıyor</li>
+                                                        <li class="mb-2"><i class="fas fa-check text-warning me-2"></i>Yemek ve yol desteği sağlanıyor</li>
+                                                        <li class="mb-0"><i class="fas fa-check text-warning me-2"></i>Prim ve ek ödeme imkanları mevcut</li>
+                                                    </ul>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary bg-darker">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>Kapat
+                    </button>
+                    <a href="https://wa.me/905413982042" target="_blank" class="btn btn-primary">
+                        <i class="fab fa-whatsapp me-2"></i>İletişime Geç
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALT BİLGİ (FOOTER) -->
+    <footer class="main-footer text-muted">
+        <div class="container">
+            <div class="row gy-4">
+                <div class="col-lg-5">
+                    <a class="navbar-brand fw-bold mb-2 d-inline-flex align-items-center" href="{{ url_for('main.home') }}" style="font-size: 1.25rem;">
+                        <img src="{{ url_for('static', filename='images/logo.png') }}" alt="KUWAMEDYA" height="28" class="me-2" style="object-fit: contain;">
+                        <span>KUWAMEDYA</span>
+                    </a>
+                    <p class="pe-lg-5">Yaratıcı fikirleri, yenilikçi teknoloji ve profesyonel ekiplerle birleştirerek markanız için unutulmaz deneyimler tasarlıyoruz.</p>
+                    <div class="social-icons mt-4">
+                        <a href="#" target="_blank"><i class="fab fa-twitter"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-linkedin-in"></i></a>
+                        <a href="#" target="_blank"><i class="fab fa-instagram"></i></a>
+                    </div>
+                </div>
+                <div class="col-lg-3 col-md-6">
+                    <h5 class="footer-title text-white">Hızlı Linkler</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="{{ url_for('main.home') }}" class="footer-link">Ana Sayfa</a></li>
+                        <li><a href="{{ url_for('main.personnel_list') }}" class="footer-link">Ekibimiz</a></li>
+                        <li><a href="{{ url_for('main.portfolio') }}" class="footer-link">Portfolyo</a></li>
+                        <li><a href="{{ url_for('academy.academy_home') }}" class="footer-link">Akademi</a></li>
+                    </ul>
+                </div>
+                <div class="col-lg-4 col-md-6">
+                    <h5 class="footer-title text-white">İletişim</h5>
+                    <p>Bizimle iletişime geçmek için WhatsApp üzerinden bize ulaşabilirsiniz.</p>
+                    <a href="https://wa.me/905413982042" target="_blank" class="btn btn-success mt-3">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp ile İletişim
+                    </a>
+                    <p class="mt-3 mb-0 small text-muted">
+                        <i class="fas fa-phone me-2"></i>+90 541 398 20 42
+                    </p>
+                </div>
+            </div>
+            <hr class="my-4 border-secondary">
+            <div class="text-center">
+                <p class="mb-0 small">Telif Hakkı &copy; <span id="current-year">2025</span> Kuwamedya. Tüm hakları saklıdır.</p>
+            </div>
+        </div>
+    </footer>
+    
+    <!-- YUKARI ÇIK BUTONU -->
+    <a href="#" class="scroll-top-btn"><i class="fas fa-arrow-up"></i></a>
+
+
+    <!-- JAVASCRIPT KÜTÜPHANELERİ -->
+    
+    <!-- Bootstrap 5 (JS Bundle) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" xintegrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    
+    <!-- AOS (Animasyonlar) -->
+    <script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+    
+    <!-- ANA KUWAMEDYA UYGULAMA SCRİPTİ (v5.0) -->
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+
+    <!-- Her alt şablonun (örn: portfolio.html) ekstra script ekleyebileceği blok -->
+    {% block scripts %}{% endblock %}
+</body>
+</html>
+

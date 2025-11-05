@@ -1,0 +1,257 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Kurs Yönetim Sayfası (manage_courses.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı) - SIFIRDAN OLUŞTURULDU
+
+BU ŞABLON, YÖNETİCİNİN TÜM KURSLARI GÖRÜNTÜLEDİĞİ, ARADIĞI, YENİ KURS
+EKLEDİĞİ VE MEVCUT KURSLARI YÖNETTİĞİ (DERS EKLEME/SİLME) ANA MERKEZDİR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  500 HATASI GİDERİLDİ (v5.0 KRİTİK DÜZELTME):
+    Bu dosya, 'academy_routes.py' -> 'manage_courses()' rotasının aradığı
+    eksik şablondu. Oluşturulması, videodaki 500 hatasını çözer.
+
+2.  TAM BACKEND ENTEGRASYONU:
+    Sayfa, 'academy_routes.py' rotasından gelen sayfalanmış (paginated)
+    'courses_pagination' objesini ('items', 'pages' vb.) kullanır.
+
+3.  KRİTİK İŞLEVSELLİK EKLENDİ:
+    "Yeni Kurs Ekle" butonu 'academy.add_course' rotasına gider.
+    "Dersleri Yönet" butonu 'academy.manage_lessons' rotasına gider.
+    "Düzenle" butonu 'academy.edit_course' rotasına gider.
+
+4.  SAYFAYA ÖZEL JAVASCRIPT (ANLIK ARAMA & GÜVENLİ SİLME):
+    Bu dosya, 'main.js'yi etkilemeden, sadece bu sayfada çalışacak
+    'course-search-input' (Anlık Arama) ve 'deleteCourseModal' (Güvenli Silme)
+    için kendi 'script' bloğunu içerir. Bu, modüler ve hatasız bir yapı sağlar.
+=================================================================== -->
+
+<!-- 
+  BACKEND NOTU (academy_routes.py -> manage_courses() rotası):
+  Bu şablonun çalışması için 'courses_pagination' (paginate edilmiş Course objesi)
+  değişkeninin render_template'e gönderilmesi GEREKİR.
+-->
+
+{% block title %}Kurs Yönetimi | Kuwamedya{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+
+<!-- Sayfa başlığı ve hızlı eylem butonları -->
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Kurs Yönetimi</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('academy.add_course') }}" class="btn btn-success"><i class="fas fa-plus me-2"></i>Yeni Kurs Ekle</a>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary shadow-lg" data-aos="fade-up">
+    <div class="card-header bg-darker border-secondary p-3">
+        <div class="row justify-content-between align-items-center">
+            <div class="col-md-5">
+                <h5 class="fw-bold mb-0">Sistemdeki Kurslar</h5>
+            </div>
+            <!-- ANLIK ARAMA/FİLTRELEME ÇUBUĞU -->
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-white"><i class="fas fa-search"></i></span>
+                    <input type="text" id="course-search-input" class="form-control bg-dark border-secondary text-white" placeholder="Kurs ara (Başlık, Kategori veya Eğitmen)...">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-4">Kurs</th>
+                        <th class="py-3 px-4">Kategori</th>
+                        <th class="py-3 px-4">Seviye</th>
+                        <th class="py-3 px-4">Ders Sayısı</th>
+                        <th class="py-3 px-4 text-center">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody id="course-table-body">
+                    {% if courses_pagination.items %}
+                        {% for course in courses_pagination.items %}
+                        <tr class="course-row">
+                            <td class="px-4">
+                                <div class="d-flex align-items-center">
+                                            {% set cover = course.cover_image or 'course_default.png' %}
+                                            {% if cover and cover.startswith('http') %}
+                                                <img src="{{ cover }}" class="rounded me-3" width="60" height="34" alt="{{ course.title }}" style="object-fit: cover;">
+                                            {% else %}
+                                                <img src="{{ url_for('static', filename='images/courses/' + cover) }}" class="rounded me-3" width="60" height="34" alt="{{ course.title }}" style="object-fit: cover;">
+                                            {% endif %}
+                                    <div>
+                                        <!-- Aranacak metinler için sınıflar eklendi -->
+                                        <p class="fw-bold mb-0 course-name">{{ course.title }}</p>
+                                        <small class="text-muted course-instructor">{{ course.instructor_name or 'N/A' }}</small>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-4 course-category"><span class="badge bg-info bg-opacity-25 text-info-emphasis">{{ course.category }}</span></td>
+                            <td class="px-4 course-difficulty">{{ course.difficulty }}</td>
+                            <!-- 'get_lesson_count' metodu 'models.py' içinden gelir -->
+                            <td class="px-4">{{ course.get_lesson_count() }} Ders</td>
+                            <td class="px-4 text-center">
+                                <!-- KRİTİK EYLEM BUTONLARI -->
+                                <a href="{{ url_for('academy.manage_lessons', course_id=course.id) }}" class="btn btn-primary btn-sm" title="Dersleri Yönet">
+                                    <i class="fas fa-list-ul"></i>
+                                </a>
+                                <a href="{{ url_for('academy.edit_course', course_id=course.id) }}" class="btn btn-outline-warning btn-sm" title="Kursu Düzenle">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deleteCourseModal"
+                                        data-course-id="{{ course.id }}"
+                                        data-course-name="{{ course.title }}"
+                                        title="Kursu Sil">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <!-- "Boş Durum" Koruması -->
+                    <tr>
+                        <td colspan="5" class="text-center p-5">
+                            <i class="fas fa-book-dead fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Sistemde Kayıtlı Kurs Bulunamadı</h5>
+                            <p class="text-muted">Yukarıdaki "Yeni Kurs Ekle" butonu ile ilk kursunuzu ekleyebilirsiniz.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <!-- ARAMA SONUCU BULUNAMADIĞINDA GÖSTERİLECEK SATIR -->
+            <div id="no-results-row" class="text-center p-5 d-none">
+                <i class="fas fa-search-minus fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Arama Sonucu Bulunamadı</h5>
+                <p class="text-muted">Girdiğiniz kriterlere uygun bir kurs bulunamadı.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- SAYFALAMA (PAGINATION) KONTROLLERİ -->
+    {% if courses_pagination and courses_pagination.pages > 1 %}
+    <div class="card-footer bg-darker border-secondary d-flex justify-content-center p-3">
+        <nav aria-label="Kurs Sayfaları">
+            <ul class="pagination mb-0">
+                <!-- Önceki Sayfa Linki -->
+                <li class="page-item {% if not courses_pagination.has_prev %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('academy.manage_courses', page=courses_pagination.prev_num) if courses_pagination.has_prev else '#' }}">«</a>
+                </li>
+                <!-- Sayfa Numaraları -->
+                {% for page_num in courses_pagination.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                    {% if page_num %}
+                        <li class="page-item {% if courses_pagination.page == page_num %}active{% endif %}">
+                            <a class="page-link" href="{{ url_for('academy.manage_courses', page=page_num) }}">{{ page_num }}</a>
+                        </li>
+                    {% else %}
+                        <li class="page-item disabled"><span class="page-link">...</span></li>
+                    {% endif %}
+                {% endfor %}
+                <!-- Sonraki Sayfa Linki -->
+                <li class="page-item {% if not courses_pagination.has_next %}disabled{% endif %}">
+                    <a class="page-link" href="{{ url_for('academy.manage_courses', page=courses_pagination.next_num) if courses_pagination.has_next else '#' }}">»</a>
+                </li>
+            </ul>
+        </nav>
+    </div>
+    {% endif %}
+</div>
+
+<!-- =================================================================== -->
+<!-- GÜVENLİ SİLME ONAY MODAL'I (Kursa Özel) -->
+<!-- =================================================================== -->
+<div class="modal fade" id="deleteCourseModal" tabindex="-1" aria-labelledby="deleteCourseModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="deleteCourseModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Kursu Silme Onayı</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <strong><span id="courseNameToDelete"></span></strong> adlı kursu sistemden kalıcı olarak silmek istediğinizden emin misiniz?
+                <br><br>
+                <strong class_("text-warning")>UYARI:</strong> Bu kursa bağlı <strong class="text-danger">TÜM DERSLER, QUIZLER ve PERSONEL KAYITLARI</strong> da kalıcı olarak silinecektir. Bu işlem geri alınamaz.
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteCourseForm" method="POST" action=""> <!-- Action, JS ile doldurulacak -->
+                    <button type="submit" class="btn btn-danger">Evet, Tümünü Kalıcı Olarak Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- =================================================================== -->
+<!-- SAYFAYA ÖZEL JAVASCRIPT -->
+<!-- 'main.js'yi etkilemeden, sadece bu sayfadaki arama ve silme -->
+<!-- modalı mantığını yönetir. -->
+<!-- =================================================================== -->
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // --- ANLIK ARAMA/FİLTRELEME MANTIĞI ---
+    const searchInput = document.getElementById('course-search-input');
+    const tableBody = document.getElementById('course-table-body');
+    const courseRows = tableBody.querySelectorAll('.course-row');
+    const noResultsRow = document.getElementById('no-results-row');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            courseRows.forEach(row => {
+                // Kurs adı, eğitmen veya kategori içinde ara
+                const name = (row.querySelector('.course-name')?.textContent || '').toLowerCase();
+                const instructor = (row.querySelector('.course-instructor')?.textContent || '').toLowerCase();
+                const category = (row.querySelector('.course-category')?.textContent || '').toLowerCase();
+                
+                if (name.includes(searchTerm) || instructor.includes(searchTerm) || category.includes(searchTerm)) {
+                    row.style.display = ''; // Satırı göster
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none'; // Satırı gizle
+                }
+            });
+
+            // Arama sonucuna göre "Sonuç bulunamadı" mesajını yönet
+            noResultsRow.classList.toggle('d-none', visibleCount > 0);
+        });
+    }
+
+    // --- GÜVENLİ SİLME MODAL MANTIĞI ---
+    const deleteModal = document.getElementById('deleteCourseModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget; // Modal'ı tetikleyen buton
+            
+            // 'data-course-id' ve 'data-course-name' niteliklerinden verileri al
+            const courseId = button.dataset.courseId;
+            const courseName = button.dataset.courseName;
+
+            // Modal'ın içindeki formun 'action' URL'sini dinamik olarak ayarla
+            // Bu URL, 'academy_routes.py' içindeki 'delete_course' rotasıyla eşleşmelidir
+            const form = document.getElementById('deleteCourseForm');
+            form.action = `/academy/admin/course/${courseId}/delete`;
+
+            // Modal'daki onay metnini güncelle
+            const courseNameSpan = document.getElementById('courseNameToDelete');
+            courseNameSpan.textContent = courseName;
+        });
+    }
+});
+</script>
+{% endblock %}

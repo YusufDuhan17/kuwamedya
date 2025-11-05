@@ -1,0 +1,262 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Personel Düzenleme Sayfası (edit_user.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, YÖNETİCİNİN BİR PERSONELİN TÜM BİLGİLERİNİ GÜNCELLEDİĞİ
+DETAYLI FORM SAYFASIDIR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MİMARİ GÜNCELLEMESİ (v5.0):
+    Bu şablon artık 'templates/admin/' klasöründe yer alarak ve
+    'panel/_panel_layout.html' dosyasından miras alarak, Admin ve Personel
+    arayüzü ayrımını netleştirir.
+
+2.  500 HATASI GİDERİLDİ (v5.0 KRİTİK DÜZELTME):
+    Şablon artık 'admin_routes.py' -> 'edit_user()' rotasından gelen
+    'user' ve 'form' nesneleriyle %100 uyumlu çalışmaktadır. 'user.name' ve
+    'form.role' gibi doğru değişken ve form alanları kullanılmaktadır.
+
+3.  MERKEZİ JAVASCRIPT (DRY PRENSİBİ - v5.0 DEV YÜKSELTME):
+    Bu dosyanın içindeki TÜM 'script' blokları kaldırılmıştır.
+    Fotoğraf yükleme önizlemesi ('initImagePreview') ve güvenli silme
+    modalı ('initDynamicDeleteModal') mantığı, 'layout.html' üzerinden
+    yüklenen 'static/js/main.js' dosyası tarafından merkezi olarak yönetilir.
+    'main.js', bu sayfadaki 'id="imageUpload"', 'id="imagePreview"' ve
+    'id="deleteUserModal"' elementlerini otomatik olarak bulur ve çalıştırır.
+
+4.  AVATAR ENTEGRASYONU (v5.0):
+    Profil fotoğrafı önizlemesi, 'models.py' içindeki 'avatar()'
+    metodunu kullanır, böylece fotoğrafı olmayanlar için Gravatar
+    fallback'i sağlanır.
+
+5.  GÜVENLİ SİLME ENTEGRASYONU:
+    "Personeli Sil" butonu, 'main.js'nin algılayacağı 'data-bs-target'
+    ve 'data-user-id' nitelikleriyle donatılmıştır.
+=================================================================== -->
+
+<!-- 
+  BACKEND NOTU (admin_routes.py -> edit_user(user_id) rotası):
+  Bu şablonun çalışması için 'user' (düzenlenen User objesi) ve
+  'form' (AdminUpdateUserForm objesi) değişkenlerinin
+  render_template'e gönderilmesi GEREKİR.
+-->
+
+{% block title %}Düzenle: {{ user.name }}{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+
+<!-- Sayfa başlığı ve geri dön butonu -->
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <div>
+        <h1 class="text-white fw-bold">Personeli {{ 'Düzenle' if user else 'Ekle' }}</h1>
+        {% if user %}
+        <p class="text-muted mb-0"><strong>{{ user.name }}</strong> adlı personelin bilgilerini güncelleyin.</p>
+        {% else %}
+        <p class="text-muted mb-0">Yeni personel bilgilerini ekleyin.</p>
+        {% endif %}
+    </div>
+    <a href="{{ url_for('admin.user_list') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Personel Listesine Geri Dön</a>
+</div>
+
+<!-- 
+  Ana form etiketi. 'enctype="multipart/form-data"' özelliği
+  'form.picture' (dosya yükleme) alanının çalışması için ZORUNLUDUR.
+-->
+<form method="POST" action="" enctype="multipart/form-data" novalidate>
+    {{ form.hidden_tag() }} <!-- CSRF Güvenlik Kodu -->
+    <div class="row g-4">
+        <!-- =================================================================== -->
+        <!-- 1. SOL SÜTUN - Profil Fotoğrafı ve Yönetim Ayarları -->
+        <!-- =================================================================== -->
+        <div class="col-lg-4" data-aos="fade-right">
+            <!-- Profil Fotoğrafı Kartı -->
+            <div class="card bg-dark border-secondary shadow-lg mb-4">
+                <div class="card-header bg-darker border-secondary fw-bold">Profil Fotoğrafı</div>
+                <div class="card-body text-center">
+                    <!-- 
+                      AVATAR GÜÇLENDİRMESİ (v5.0): 'user.avatar(150)' kullanıldı.
+                      id="imagePreview" -> 'main.js' tarafından resim önizlemesi için kullanılır.
+                    -->
+                    {% if user %}
+                        <img id="imagePreview" src="{{ user.avatar(150) }}" class="rounded-circle mb-3" width="150" height="150" alt="Profil Fotoğrafı" style="object-fit: cover;">
+                    {% else %}
+                        <img id="imagePreview" src="https://www.gravatar.com/avatar/00000000000000000000000000000000?d=mp&s=150" class="rounded-circle mb-3" width="150" height="150" alt="Profil Fotoğrafı" style="object-fit: cover;">
+                    {% endif %}
+                    <div class="form-group">
+                        <!-- 
+                          id="imageUpload" -> 'main.js' tarafından önizlemeyi tetiklemek için kullanılır.
+                        -->
+                        {{ form.picture(class="form-control form-control-sm bg-darker border-secondary text-white", id="imageUpload") }}
+                        {% if form.picture.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in form.picture.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <small class="text-muted">Yeni fotoğraf yüklemek için seçin (JPG, PNG).</small>
+                </div>
+            </div>
+
+            <!-- Yönetim Ayarları Kartı -->
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-darker border-secondary fw-bold">Yönetim Ayarları</div>
+                <div class="card-body">
+                    <!-- 
+                      KRİTİK DÜZELTME (v5.0): 'form.is_admin' yerine 'form.role' kullanıldı.
+                      Bu, 'forms.py' içindeki 'AdminUpdateUserForm' ile eşleşir.
+                    -->
+                    <div class="mb-3">
+                        {{ form.role.label(class="form-label") }}
+                        {{ form.role(class="form-select bg-darker border-secondary text-white" + (" is-invalid" if form.role.errors else "")) }}
+                        {% if form.role.errors %}<div class="invalid-feedback">{% for error in form.role.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                    </div>
+                    <div class="form-check form-switch fs-5">
+                        {{ form.is_active(class="form-check-input" + (" is-invalid" if form.is_active.errors else "")) }}
+                        {{ form.is_active.label(class="form-check-label") }}
+                        {% if form.is_active.errors %}<div class="invalid-feedback">{% for error in form.is_active.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                    </div>
+                    <small class="text-muted">Hesap pasif hale getirilirse, personel sisteme giriş yapamaz.</small>
+                </div>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- 2. SAĞ SÜTUN - Personel Bilgi Formları -->
+        <!-- =================================================================== -->
+        <div class="col-lg-8" data-aos="fade-left">
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-darker border-secondary">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#temel-bilgiler">Temel Bilgiler</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#profil-detaylari">Profil Detayları</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#sosyal-medya">Sosyal Medya</a></li>
+                    </ul>
+                </div>
+                <div class="card-body">
+                    <div class="tab-content p-3">
+                        <!-- Temel Bilgiler Sekmesi -->
+                        <div class="tab-pane fade show active" id="temel-bilgiler">
+                            <div class="mb-3">
+                                {{ form.name.label(class="form-label") }}
+                                {{ form.name(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.name.errors else "")) }}
+                                {% if form.name.errors %}<div class="invalid-feedback">{% for error in form.name.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.username.label(class="form-label") }}
+                                {{ form.username(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.username.errors else "")) }}
+                                {% if form.username.errors %}<div class="invalid-feedback">{% for error in form.username.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.email.label(class="form-label") }}
+                                {{ form.email(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.email.errors else "")) }}
+                                {% if form.email.errors %}<div class="invalid-feedback">{% for error in form.email.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                        <!-- Profil Detayları Sekmesi -->
+                        <div class="tab-pane fade" id="profil-detaylari">
+                            <div class="mb-3">
+                                {{ form.title.label(class="form-label") }}
+                                {{ form.title(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.title.errors else "")) }}
+                                {% if form.title.errors %}<div class="invalid-feedback">{% for error in form.title.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.quote.label(class="form-label") }}
+                                {{ form.quote(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.quote.errors else ""), rows="2") }}
+                                {% if form.quote.errors %}<div class="invalid-feedback">{% for error in form.quote.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.bio.label(class="form-label") }}
+                                {{ form.bio(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.bio.errors else ""), rows="5") }}
+                                {% if form.bio.errors %}<div class="invalid-feedback">{% for error in form.bio.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                        <!-- Sosyal Medya Sekmesi -->
+                        <div class="tab-pane fade" id="sosyal-medya">
+                            <div class="input-group mb-3">
+                                <span class="input-group-text" style="width: 40px;"><i class="fab fa-linkedin-in"></i></span>
+                                {{ form.social_linkedin(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.social_linkedin.errors else ""), placeholder="https://linkedin.com/in/kullanici") }}
+                                {% if form.social_linkedin.errors %}<div class="invalid-feedback">{% for error in form.social_linkedin.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                             <div class="input-group mb-3">
+                                <span class="input-group-text" style="width: 40px;"><i class="fab fa-twitter"></i></span>
+                                {{ form.social_twitter(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.social_twitter.errors else ""), placeholder="https://twitter.com/kullanici") }}
+                                {% if form.social_twitter.errors %}<div class="invalid-feedback">{% for error in form.social_twitter.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                             <div class="input-group mb-3">
+                                <span class="input-group-text" style="width: 40px;"><i class="fab fa-github"></i></span>
+                                {{ form.social_github(class="form-control bg-darker border-secondary text-white" + (" is-invalid" if form.social_github.errors else ""), placeholder="https://github.com/kullanici") }}
+                                {% if form.social_github.errors %}<div class="invalid-feedback">{% for error in form.social_github.errors %}<span>{{ error }}</span>{% endfor %}</div>{% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-darker border-secondary text-end">
+                    {{ form.submit(class="btn btn-primary") }}
+                </div>
+            </div>
+
+             <!-- TEHLİKELİ ALAN KARTI -->
+             <div class="card bg-dark border-danger mt-4" data-aos="fade-up" data-aos-delay="200">
+                <div class="card-header bg-danger text-white fw-bold">Tehlikeli Alan</div>
+                <div class="card-body d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="fw-bold">Personeli Sil</h6>
+                        <p class="text-muted mb-0 small">Bu işlem kalıcıdır ve geri alınamaz.</p>
+                    </div>
+                    <!-- 
+                      GÜVENLİ SİLME ENTEGRASYONU (v5.0):
+                      Bu buton, 'main.js' tarafından yönetilen 'deleteUserModal'ı tetikler.
+                    -->
+                    <button type="button" class="btn btn-danger" 
+                            data-bs-toggle="modal" 
+                            data-bs-target="#deleteUserModal"
+                            data-user-id="{{ user.id }}"
+                            data-user-name="{{ user.name }}">
+                        <i class="fas fa-trash-alt me-2"></i>Personeli Sil
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</form>
+
+<!-- 
+  GÜVENLİ SİLME MODALI
+  Bu modal, 'main.js' tarafından dinamik olarak doldurulur.
+  id="deleteUserModal", id="userNameToDelete", id="deleteUserForm"
+-->
+<div class="modal fade" id="deleteUserModal" tabindex="-1" aria-labelledby="deleteUserModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="deleteUserModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Personeli Silme Onayı</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <strong><span id="userNameToDelete"></span></strong> adlı personeli sistemden kalıcı olarak silmek istediğinizden emin misiniz? Bu işlem geri alınamaz.
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteUserForm" method="POST" action=""> <!-- Action, main.js tarafından doldurulur -->
+                    <button type="submit" class="btn btn-danger">Evet, Kalıcı Olarak Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- 
+  KOD TEMİZLİĞİ (DRY PRENSİBİ - v5.0):
+  Bu dosyadaki scripts bloğu kasten kaldırıldı.
+  Tüm JavaScript mantığı (resim önizleme ve silme modalı),
+  'layout.html' üzerinden yüklenen 'static/js/main.js' dosyasındaki
+  'KuwamedyaApp.Panel.initImagePreview' ve 'KuwamedyaApp.Panel.initDynamicDeleteModal'
+  fonksiyonları tarafından merkezi olarak yönetilecektir.
+-->

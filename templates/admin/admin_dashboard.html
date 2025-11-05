@@ -1,0 +1,212 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Yönetici Kontrol Paneli (admin_dashboard.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, PROJENİN ANA YÖNETİM MERKEZİDİR.
+Tüm kritik veriler, istatistikler ve son aktiviteler burada özetlenir.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MİMARİ GÜNCELLEMESİ (v5.0):
+    Bu şablon artık 'templates/admin/' klasöründe yer alarak ve
+    'panel/_panel_layout.html' dosyasından miras alarak, Admin ve Personel
+    arayüzü ayrımını netleştirir.
+
+2.  TAMAMEN DİNAMİK VERİ (500 HATASI DÜZELTMESİ):
+    Şablon artık 'admin_routes.py' dosyasından gönderilen DOĞRU ve
+    EKSİKSİZ verileri ('stats', 'latest_users', 'recent_activities')
+    kullanır. Bu, videodaki 500 hatalarını tamamen çözer.
+
+3.  AVATAR ENTEGRASYONU (v5.0 YÜKSELTMESİ):
+    "Son Eklenenler" ve "Aktiviteler" listeleri, 'models.py' içindeki
+    'avatar()' metodunu kullanır. Fotoğrafı olmayan kullanıcılar için
+    otomatik olarak Gravatar resimleri gösterilir.
+
+4.  ÖZEL JINJA FİLTRELERİ (v5.0 YÜKSELTMESİ):
+    KPI kartlarındaki parasal değerler, 'app.py' içinde tanımlanan
+    'currency_format' filtresini kullanarak formatlanır.
+
+5.  GÜVENLİ HTML RENDER (v5.0 KRİTİK DÜZELTME):
+    Aktivite akışındaki 'activity.action' metni, 'safe' filtresi ile
+    render edilir. Bu, '<strong>admin</strong> giriş yaptı' gibi
+    HTML içeren logların düzgün görüntülenmesini sağlar.
+=================================================================== -->
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+
+<!-- Sayfa ana başlığı ve hızlı eylem butonu -->
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Yönetici Paneli</h1>
+    <div>
+        <!-- Link 'admin_routes.py' içindeki 'add_user' rotasına gider -->
+        <a href="{{ url_for('admin.add_user') }}" class="btn btn-success"><i class="fas fa-user-plus me-2"></i>Yeni Personel Ekle</a>
+    </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- 1. KİLİT PERFORMANS GÖSTERGELERİ (KPI) KARTLARI -->
+<!-- 'admin_routes.py' -> 'admin_dashboard()' rotasından gelen 'stats' sözlüğü ile doldurulur. -->
+<!-- =================================================================== -->
+<div class="row g-4 mb-5">
+    <!-- Toplam Personel -->
+    <div class="col-lg-3 col-md-6" data-aos="fade-up">
+        <div class="card bg-dark border-secondary shadow-lg h-100 stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-card-icon bg-primary"><i class="fas fa-users"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Toplam Personel</p>
+                        <h4 class="fw-bold mb-0">{{ stats.total_staff or 0 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bu Ayki Ciro -->
+    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="100">
+        <div class="card bg-dark border-secondary shadow-lg h-100 stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-card-icon bg-success"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Bu Ayki Ciro</p>
+                        <!-- GÜÇLENDİRME (v5.0): 'currency_format' filtresi kullanılıyor -->
+                        <h4 class="fw-bold mb-0">{{ (stats.monthly_revenue or 0) | currency_format }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Bu Ay Ödenen Prim -->
+    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="200">
+        <div class="card bg-dark border-secondary shadow-lg h-100 stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-card-icon bg-warning"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Ödenen Prim (Bu Ay)</p>
+                         <!-- GÜÇLENDİRME (v5.0): 'currency_format' filtresi kullanılıyor -->
+                        <h4 class="fw-bold mb-0">{{ (stats.monthly_commission or 0) | currency_format }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Aktif Kurs Sayısı -->
+    <div class="col-lg-3 col-md-6" data-aos="fade-up" data-aos-delay="300">
+        <div class="card bg-dark border-secondary shadow-lg h-100 stat-card">
+            <div class="card-body">
+                <div class="d-flex align-items-center">
+                    <div class="stat-card-icon bg-info"><i class="fas fa-book-open"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Aktif Kurs Sayısı</p>
+                        <h4 class="fw-bold mb-0">{{ stats.active_courses or 0 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-5">
+    <!-- =================================================================== -->
+    <!-- 2. SOL SÜTUN - SON EKLENEN PERSONEL LİSTESİ -->
+    <!-- 'admin_routes.py' -> 'admin_dashboard()' rotasından gelen 'latest_users' listesi ile doldurulur. -->
+    <!-- =================================================================== -->
+    <div class="col-lg-8" data-aos="fade-right">
+        <div class="card bg-dark border-secondary shadow-lg h-100">
+            <div class="card-header bg-darker border-secondary d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold mb-0"><i class="fas fa-user-friends me-2"></i>Son Eklenen Personeller</h5>
+                <a href="{{ url_for('admin.user_list') }}" class="btn btn-outline-primary btn-sm">Tümünü Gör <i class="fas fa-arrow-right ms-1"></i></a>
+            </div>
+            <div class="card-body p-0">
+                <div class="table-responsive">
+                    <table class="table table-dark table-hover mb-0 align-middle">
+                        <thead>
+                            <tr>
+                                <th class="py-3 px-4">Personel</th>
+                                <th class="py-3 px-4">Unvan</th>
+                                <th class="py-3 px-4">Katılım Tarihi</th>
+                                <th class="py-3 px-4 text-center">Eylemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% if latest_users %}
+                                {% for user in latest_users %}
+                                <tr>
+                                    <td class="px-4">
+                                        <div class="d-flex align-items-center">
+                                            <!-- AVATAR GÜÇLENDİRMESİ (v5.0) -->
+                                            <img src="{{ user.avatar(40) }}" class="rounded-circle me-3" width="40" height="40" alt="{{ user.username }}" style="object-fit: cover;">
+                                            <div>
+                                                <p class="fw-bold mb-0">{{ user.name }}</p>
+                                                <small class="text-muted">{{ user.email }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td class="px-4"><span class="badge bg-secondary">{{ user.title or 'N/A' }}</span></td>
+                                    <!-- 'strftime_tr' filtresi 'app.py' içinde tanımlanmıştır -->
+                                    <td class="px-4">{{ user.date_created | strftime_tr }}</td>
+                                    <td class="px-4 text-center">
+                                        <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" class="btn btn-outline-warning btn-sm" title="Düzenle"><i class="fas fa-pencil-alt"></i></a>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            {% else %}
+                            <!-- "Boş Durum" Koruması -->
+                            <tr>
+                                <td colspan="4" class="text-center p-4">
+                                    <p class="mb-0 text-muted">Sistemde henüz kayıtlı personel bulunmuyor.</p>
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- =================================================================== -->
+    <!-- 3. SAĞ SÜTUN - SON AKTİVİTELER AKIŞI -->
+    <!-- 'admin_routes.py' -> 'admin_dashboard()' rotasından gelen 'recent_activities' listesi ile doldurulur. -->
+    <!-- =================================================================== -->
+    <div class="col-lg-4" data-aos="fade-left">
+         <div class="card bg-dark border-secondary shadow-lg h-100">
+            <div class="card-header bg-darker border-secondary">
+                <h5 class="fw-bold mb-0"><i class="fas fa-history me-2"></i>Son Aktiviteler</h5>
+            </div>
+            <div class="card-body">
+                {% if recent_activities %}
+                <ul class="list-group list-group-flush">
+                   {% for activity in recent_activities %}
+                    <li class="list-group-item bg-dark px-0 d-flex">
+                        <!-- AVATAR GÜÇLENDİRMESİ (v5.0) -->
+                        <img src="{{ activity.user.avatar(35) }}" class="rounded-circle me-3" width="35" height="35" alt="{{ activity.user.username }}" style="object-fit: cover;">
+                        <div>
+                            <!-- 
+                              KRİTİK DÜZELTME (v5.0): '|safe' filtresi eklendi.
+                              Bu, '<strong>admin</strong>' gibi HTML'lerin render edilmesini sağlar.
+                            -->
+                            <p class="mb-1 small">{{ activity.action | safe }}</p>
+                            <small class="text-muted">{{ activity.timestamp | strftime_tr('%d %B %H:%M') }}</small>
+                        </div>
+                    </li>
+                   {% endfor %}
+                </ul>
+                {% else %}
+                <!-- "Boş Durum" Koruması -->
+                <div class="text-center p-3">
+                    <p class="mb-0 text-muted">Henüz bir aktivite kaydedilmedi.</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

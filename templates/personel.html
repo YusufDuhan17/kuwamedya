@@ -1,0 +1,321 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Ekibimiz Sayfası (personel.html)
+Sürüm: v6.1 (Akademi Yükseltmesi - Hata Düzeltmesi)
+
+YENİLİKLER VE GÜÇLENDİRMELER (v6.1):
+1.  HATA DÜZELTMESİ (TemplateSyntaxError - KRİTİK):
+    - v6.0'a geçerken, 'Admin ise, yönetim paneline yönlendirilir'
+      bölümündeki 'if' etiketi, 'endif' ile
+      kapatılmamıştı.
+    - KOD DÜZELTMESİ:
+      "Boş Durum" kartının içine, eksik olan 'endif' etiketi
+      eklenmiştir. Bu, 'Unexpected end of template' hatasını düzeltir.
+
+2.  V6.0 ÖZELLİKLERİ KORUNDU:
+    - Şablon, 'main_routes.py' (v6.0) içindeki 'is_staff'
+      (Admin veya Personel) kontrolü ile filtrelenmiş 'team_members'
+      listesiyle %100 uyumlu çalışır.
+    - 'public_user_profile' rotasına (halka açık profil) giden linkler
+      korunmuştur.
+    - Sayfaya özel anlık arama (JS) korunmuştur.
+=================================================================== -->
+
+<!-- Sayfa başlığı (Title) ve SEO Açıklaması (Description) blokları -->
+{% block title %}Ekibimiz - Alanında Uzman Profesyoneller | Kuwamedya{% endblock %}
+{% block description %}Kuwamedya'nın başarısının arkasındaki dijital pazarlama uzmanları, web geliştiricileri ve yaratıcı profesyonellerden oluşan tutkulu ekiple tanışın.{% endblock %}
+
+<!-- Ana içerik bloğu -->
+{% block content %}
+
+<!-- Sayfa başlığı -->
+<section class="page-header py-5 text-center">
+    <div class="container" data-aos="fade-down">
+        <h1 class="display-4 fw-bold">Ekibimiz</h1>
+        <p class="lead text-muted">Başarımızın arkasındaki yetenekli ve tutkulu insanlar.</p>
+    </div>
+</section>
+
+<!-- Ekip üyeleri bölümü -->
+<section class="team-section py-5">
+    <div class="container">
+        
+        <!-- Sadece ekip üyesi varsa arama çubuğunu göster -->
+        {% if team_members %}
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-6" data-aos="fade-up">
+                <div class="input-group input-group-lg">
+                    <span class="input-group-text bg-dark border-secondary"><i class="fas fa-search text-white"></i></span>
+                    <input type="text" id="team-search-input" class="form-control bg-dark border-secondary text-white" placeholder="Ekip içinde ara (İsim, Unvan...)...">
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Ekip Kartlarının Listelendiği Alan -->
+        <div class="row gy-5" id="team-members-row">
+            
+            {% if team_members %}
+                {% for person in team_members %}
+                <div class="col-lg-3 col-md-6 team-member-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                    <div class="card bg-dark border-secondary h-100 shadow-lg text-center team-card">
+                        <div class="team-img-wrap">
+                            {% if person.image_file %}
+                                <img src="{{ person.avatar(300) }}" alt="{{ person.name }}" class="team-img">
+                            {% else %}
+                                <div class="team-img-placeholder d-flex align-items-center justify-content-center bg-primary" style="width: 100%; height: 300px;">
+                                    <i class="fas fa-user fa-5x text-white"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ person.name }}</h5>
+                            <p class="card-text text-primary">{{ person.title }}</p>
+                            <p class="card-text text-muted fst-italic small flex-grow-1">
+                                "{{ person.quote or 'Dijital dünyada fark yaratıyoruz.' }}"
+                            </p>
+                            
+                            <div class="social-links-public mb-3">
+                                {% if person.social_linkedin %}<a href="{{ person.social_linkedin }}" target="_blank" title="LinkedIn"><i class="fab fa-linkedin-in"></i></a>{% endif %}
+                                {% if person.social_twitter %}<a href="{{ person.social_twitter }}" target="_blank" title="Twitter"><i class="fab fa-twitter"></i></a>{% endif %}
+                                {% if person.social_github %}<a href="{{ person.social_github }}" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>{% endif %}
+                            </div>
+
+                            <!-- 
+                              GÜNCELLEME (v6.0):
+                              Link 'main.public_user_profile' rotasına gidiyor.
+                              Bu rota v6.0'da 'is_staff' kontrolü yapacak şekilde güncellendi.
+                            -->
+                            <a href="{{ url_for('main.public_user_profile', username=person.username) }}" class="btn btn-sm btn-outline-primary mt-auto">Profili Görüntüle</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <!-- Yer tutucu iki ekip üyesi ve WhatsApp butonları -->
+                {% for p in [
+                    {'name':'Ekip Üyesi','title':'Dijital Uzman','phone':'905413982042'},
+                    {'name':'Ekip Üyesi','title':'Web Geliştirici','phone':'905413982042'}
+                ] %}
+                <div class="col-lg-3 col-md-6 team-member-card" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                    <div class="card bg-dark border-secondary h-100 shadow-lg text-center team-card">
+                        <div class="team-img-wrap">
+                            <div class="team-img-placeholder d-flex align-items-center justify-content-center bg-primary" style="width: 100%; height: 300px;">
+                                <i class="fas fa-user fa-5x text-white"></i>
+                            </div>
+                        </div>
+                        <div class="card-body d-flex flex-column">
+                            <h5 class="card-title fw-bold">{{ p.name }}</h5>
+                            <p class="card-text text-primary">{{ p.title }}</p>
+                            <p class="card-text text-muted fst-italic small flex-grow-1">"Sizin için buradayız."</p>
+                            <a href="https://wa.me/{{ p.phone }}" target="_blank" class="btn btn-sm btn-success mt-auto"><i class="fab fa-whatsapp me-1"></i>WhatsApp</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+             <!-- "BOŞ DURUM" TASARIMI (ARAMA İÇİN) -->
+            <div class="col-12 text-center py-5 d-none" id="no-results-message">
+                <div class="empty-state-card bg-dark border-secondary p-5 rounded">
+                    <i class="fas fa-search-minus fa-4x text-primary mb-4"></i>
+                    <h3 class="fw-bold">Arama Sonucu Bulunamadı</h3>
+                    <p class="text-muted">Girdiğiniz kriterlere uygun bir ekip üyesi bulunamadı.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Ekibimize Katılın Bölümü -->
+<section class="join-team-section py-5 bg-gradient-warm">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="text-center mb-5" data-aos="fade-down">
+                    <h2 class="display-5 fw-bold mb-3" style="color: #3d2817;">
+                        <i class="fas fa-users me-2" style="color: var(--primary);"></i>Ekibimize Katılın
+                    </h2>
+                    <p class="lead" style="color: #8b7355;">
+                        Yetenekli ve tutkulu ekibimize katılmak ister misiniz? Aşağıdaki bilgileri inceleyerek başvurunuzu yapabilirsiniz.
+                    </p>
+                </div>
+
+                <!-- FAQ Accordion -->
+                <div class="accordion accordion-flush" id="joinTeamFAQ">
+                    <!-- İşe Alım Süreci -->
+                    <div class="accordion-item bg-white bg-opacity-80 border-0 mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingIsAlim">
+                            <button class="accordion-button bg-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseIsAlim" aria-expanded="false" aria-controls="collapseIsAlim" style="color: #3d2817;">
+                                <i class="fas fa-briefcase me-2" style="color: var(--primary);"></i>İşe Alım Süreci Hakkında Sorular
+                            </button>
+                        </h2>
+                        <div id="collapseIsAlim" class="accordion-collapse collapse" aria-labelledby="headingIsAlim" data-bs-parent="#joinTeamFAQ">
+                            <div class="accordion-body bg-white" style="color: #3d2817;">
+                                <ul class="list-unstyled">
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Hangi pozisyonlarda personel arıyorsunuz?</strong>
+                                        <span style="color: #8b7355;">Tüm pozisyonlar için detaylı bilgi almak için bizimle iletişime geçin.</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Başvuru süreci nasıl işliyor? (CV, mülakat, sınav vb.)</strong>
+                                        <span style="color: #8b7355;">CV, mülakat ve gerekirse sınav süreçlerini yürütüyoruz. Detaylar için WhatsApp üzerinden iletişime geçebilirsiniz.</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Ne kadar sürede geri dönüş yapıyorsunuz?</strong>
+                                        <span style="color: #8b7355;">Başvurularınızı en kısa sürede değerlendirip size dönüş yapıyoruz.</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Daha önce tecrübesi olmayan adaylara da şans veriliyor mu?</strong>
+                                        <span style="color: #8b7355;">Evet, eğitim ve oryantasyon programlarımızla yeni başlayanlara da fırsat sunuyoruz.</span>
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Eğitim veya oryantasyon sağlıyor musunuz?</strong>
+                                        <span style="color: #8b7355;">Evet, tüm personelimize kapsamlı eğitim ve oryantasyon desteği sağlıyoruz.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Çalışma Şartları -->
+                    <div class="accordion-item bg-white bg-opacity-80 border-0 mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingCalisma">
+                            <button class="accordion-button bg-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseCalisma" aria-expanded="false" aria-controls="collapseCalisma" style="color: #3d2817;">
+                                <i class="fas fa-clock me-2" style="color: var(--primary);"></i>Çalışma Şartları
+                            </button>
+                        </h2>
+                        <div id="collapseCalisma" class="accordion-collapse collapse" aria-labelledby="headingCalisma" data-bs-parent="#joinTeamFAQ">
+                            <div class="accordion-body bg-white" style="color: #3d2817;">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Çalışma saatleri projeye göre belirleniyor</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Tam zamanlı, yarı zamanlı ve dönemsel iş imkanları mevcut</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Fazla mesai ücreti ödeniyor</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Görev yerleri değişkenlik gösterebilir</li>
+                                    <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Aynı anda birden fazla projede çalışma imkanı var</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Ücretlendirme ve Haklar -->
+                    <div class="accordion-item bg-white bg-opacity-80 border-0 mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingUcret">
+                            <button class="accordion-button bg-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseUcret" aria-expanded="false" aria-controls="collapseUcret" style="color: #3d2817;">
+                                <i class="fas fa-money-bill-wave me-2" style="color: var(--primary);"></i>Ücretlendirme ve Haklar
+                            </button>
+                        </h2>
+                        <div id="collapseUcret" class="accordion-collapse collapse" aria-labelledby="headingUcret" data-bs-parent="#joinTeamFAQ">
+                            <div class="accordion-body bg-white" style="color: #3d2817;">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Maaşlar düzenli olarak ödeniyor</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Ödemeler banka hesabına yapılıyor</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Sigorta yapılıyor</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Yemek ve yol desteği sağlanıyor</li>
+                                    <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Prim, ek ödeme veya bahşiş paylaşımı var mı?</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Kariyer ve Gelişim -->
+                    <div class="accordion-item bg-white bg-opacity-80 border-0 mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingKariyer">
+                            <button class="accordion-button bg-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseKariyer" aria-expanded="false" aria-controls="collapseKariyer" style="color: #3d2817;">
+                                <i class="fas fa-chart-line me-2" style="color: var(--primary);"></i>Kariyer ve Gelişim
+                            </button>
+                        </h2>
+                        <div id="collapseKariyer" class="accordion-collapse collapse" aria-labelledby="headingKariyer" data-bs-parent="#joinTeamFAQ">
+                            <div class="accordion-body bg-white" style="color: #3d2817;">
+                                <ul class="list-unstyled">
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Şirket içinde yükselme imkânı var</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Eğitim ve sertifika programları sağlıyoruz</li>
+                                    <li class="mb-2"><i class="fas fa-check-circle text-success me-2"></i>Düzenli çalışmalarda uzun vadeli iş imkânı var</li>
+                                    <li class="mb-0"><i class="fas fa-check-circle text-success me-2"></i>Çalışan performansı düzenli olarak değerlendiriliyor</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Organizasyonlarla İlgili Sorular -->
+                    <div class="accordion-item bg-white bg-opacity-80 border-0 mb-3 rounded shadow-sm">
+                        <h2 class="accordion-header" id="headingOrganizasyon">
+                            <button class="accordion-button bg-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOrganizasyon" aria-expanded="false" aria-controls="collapseOrganizasyon" style="color: #3d2817;">
+                                <i class="fas fa-calendar-check me-2" style="color: var(--primary);"></i>Organizasyonlarla İlgili Sorular
+                            </button>
+                        </h2>
+                        <div id="collapseOrganizasyon" class="accordion-collapse collapse" aria-labelledby="headingOrganizasyon" data-bs-parent="#joinTeamFAQ">
+                            <div class="accordion-body bg-white" style="color: #3d2817;">
+                                <ul class="list-unstyled">
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Organizasyon günü nelere dikkat etmemiz gerekiyor?</strong>
+                                        <span style="color: #8b7355;">Profesyonellik, zamanında katılım ve verilen görevleri eksiksiz yerine getirmek öncelikli beklentilerimizdir.</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Kıyafet/üniforma sağlanıyor mu, yoksa kendi kıyafetimizi mi giymeliyiz?</strong>
+                                        <span style="color: #8b7355;">Genelde biz veriyoruz. Özel bir kıyafet gerekirse önceden bilgilendiriyoruz.</span>
+                                    </li>
+                                    <li class="mb-3">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Acil bir durumda (hastalık, gelememe vb.) ne yapmamız gerekiyor?</strong>
+                                        <span style="color: #8b7355;">Acil durumlarda hemen bizimle iletişime geçin, yedekleme yapabiliyoruz.</span>
+                                    </li>
+                                    <li class="mb-0">
+                                        <strong class="d-block mb-1" style="color: #3d2817;"><i class="fas fa-question-circle me-2" style="color: var(--primary);"></i>Çalışanların güvenliği için hangi önlemler alınıyor?</strong>
+                                        <span style="color: #8b7355;">Tüm organizasyonlarda güvenlik önlemleri alınır ve çalışanlarımızın güvenliği önceliklidir.</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CTA Butonları -->
+                <div class="text-center mt-5" data-aos="fade-up">
+                    <a href="https://wa.me/905413982042" target="_blank" class="btn btn-success btn-lg me-3 mb-3 shadow-sm">
+                        <i class="fab fa-whatsapp me-2"></i>WhatsApp ile Başvur
+                    </a>
+                    <a href="https://wa.me/905413982042" target="_blank" class="btn btn-light btn-lg mb-3 shadow-sm" style="background-color: white; color: #3d2817; border-color: #e8dcc8;">
+                        <i class="fas fa-envelope me-2"></i>CV Gönder
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+
+{% block scripts %}
+<!-- Bu sayfaya özel anlık arama script'i -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('team-search-input');
+    const teamMembersRow = document.getElementById('team-members-row');
+    const noResultsMessage = document.getElementById('no-results-message');
+
+    if (searchInput && teamMembersRow && noResultsMessage) {
+        const teamCards = teamMembersRow.querySelectorAll('.team-member-card');
+        
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            teamCards.forEach(card => {
+                const cardText = card.innerText.toLowerCase();
+                
+                if (cardText.includes(searchTerm)) {
+                    card.style.display = ''; 
+                    visibleCount++;
+                } else {
+                    card.style.display = 'none'; 
+                }
+            });
+
+            noResultsMessage.classList.toggle('d-none', visibleCount > 0);
+        });
+    }
+});
+</script>
+{% endblock %}

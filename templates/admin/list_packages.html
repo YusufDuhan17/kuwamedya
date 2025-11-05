@@ -1,0 +1,168 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Paket Yönetim Sayfası (list_packages.html)
+Sürüm: v6.0
+=================================================================== -->
+
+{% block title %}Paket Yönetimi | Kuwamedya{% endblock %}
+
+{% block panel_content %}
+
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Paket Yönetimi</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.add_package') }}" class="btn btn-success"><i class="fas fa-plus me-2"></i>Yeni Paket Ekle</a>
+    </div>
+</div>
+
+<div class="card bg-dark border-secondary shadow-lg" data-aos="fade-up">
+    <div class="card-header bg-darker border-secondary p-3">
+        <div class="row justify-content-between align-items-center">
+            <div class="col-md-5">
+                <h5 class="fw-bold mb-0">Sistemdeki Paketler</h5>
+            </div>
+            <div class="col-md-7">
+                <div class="input-group">
+                    <span class="input-group-text bg-dark border-secondary text-white"><i class="fas fa-search"></i></span>
+                    <input type="text" id="package-search-input" class="form-control bg-dark border-secondary text-white" placeholder="Paket ara (İsim veya Açıklama)...">
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table table-dark table-hover mb-0 align-middle">
+                <thead>
+                    <tr>
+                        <th class="py-3 px-4">Paket Adı</th>
+                        <th class="py-3 px-4">Aylık Fiyat</th>
+                        <th class="py-3 px-4">Yıllık Fiyat</th>
+                        <th class="py-3 px-4">Popüler</th>
+                        <th class="py-3 px-4 text-center">Eylemler</th>
+                    </tr>
+                </thead>
+                <tbody id="package-table-body">
+                    {% if packages %}
+                        {% for package in packages %}
+                        <tr class="package-row">
+                            <td class="px-4">
+                                <div>
+                                    <p class="fw-bold mb-0 package-name">{{ package.name }}</p>
+                                    <small class="text-muted">{{ package.description[:50] if package.description else 'Açıklama yok' }}...</small>
+                                </div>
+                            </td>
+                            <td class="px-4">{{ package.price_monthly|currency_format }}</td>
+                            <td class="px-4">{{ package.price_yearly|currency_format }}</td>
+                            <td class="px-4">
+                                {% if package.is_popular %}
+                                    <span class="badge bg-warning text-dark">Popüler</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">-</span>
+                                {% endif %}
+                            </td>
+                            <td class="px-4 text-center">
+                                <a href="{{ url_for('admin.edit_package', package_id=package.id) }}" class="btn btn-outline-warning btn-sm" title="Paketi Düzenle">
+                                    <i class="fas fa-pencil-alt"></i>
+                                </a>
+                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                        data-bs-toggle="modal" 
+                                        data-bs-target="#deletePackageModal"
+                                        data-package-id="{{ package.id }}"
+                                        data-package-name="{{ package.name }}"
+                                        title="Paketi Sil">
+                                    <i class="fas fa-trash-alt"></i>
+                                </button>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center p-5">
+                            <i class="fas fa-box fa-3x text-muted mb-3"></i>
+                            <h5 class="text-muted">Sistemde Kayıtlı Paket Bulunamadı</h5>
+                            <p class="text-muted">Yukarıdaki "Yeni Paket Ekle" butonu ile ilk paketinizi ekleyebilirsiniz.</p>
+                        </td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+            <div id="no-results-row" class="text-center p-5 d-none">
+                <i class="fas fa-search-minus fa-3x text-muted mb-3"></i>
+                <h5 class="text-muted">Arama Sonucu Bulunamadı</h5>
+                <p class="text-muted">Girdiğiniz kriterlere uygun bir paket bulunamadı.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Silme Onay Modal'ı -->
+<div class="modal fade" id="deletePackageModal" tabindex="-1" aria-labelledby="deletePackageModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <div class="modal-header border-secondary">
+                <h5 class="modal-title" id="deletePackageModalLabel"><i class="fas fa-exclamation-triangle text-danger me-2"></i>Paketi Silme Onayı</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Kapat"></button>
+            </div>
+            <div class="modal-body">
+                <strong><span id="packageNameToDelete"></span></strong> adlı paketi sistemden kalıcı olarak silmek istediğinizden emin misiniz?
+                <br><br>
+                <strong class="text-warning">UYARI:</strong> Bu işlem geri alınamaz.
+            </div>
+            <div class="modal-footer border-secondary">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deletePackageForm" method="POST" action="">
+                    <button type="submit" class="btn btn-danger">Evet, Kalıcı Olarak Sil</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById('package-search-input');
+    const tableBody = document.getElementById('package-table-body');
+    const packageRows = tableBody.querySelectorAll('.package-row');
+    const noResultsRow = document.getElementById('no-results-row');
+
+    if (searchInput) {
+        searchInput.addEventListener('keyup', function() {
+            const searchTerm = this.value.toLowerCase().trim();
+            let visibleCount = 0;
+
+            packageRows.forEach(row => {
+                const name = (row.querySelector('.package-name')?.textContent || '').toLowerCase();
+                
+                if (name.includes(searchTerm)) {
+                    row.style.display = '';
+                    visibleCount++;
+                } else {
+                    row.style.display = 'none';
+                }
+            });
+
+            noResultsRow.classList.toggle('d-none', visibleCount > 0);
+        });
+    }
+
+    const deleteModal = document.getElementById('deletePackageModal');
+    if (deleteModal) {
+        deleteModal.addEventListener('show.bs.modal', function (event) {
+            const button = event.relatedTarget;
+            const packageId = button.dataset.packageId;
+            const packageName = button.dataset.packageName;
+
+            const form = document.getElementById('deletePackageForm');
+            form.action = `/admin/delete_package/${packageId}`;
+
+            const packageNameSpan = document.getElementById('packageNameToDelete');
+            packageNameSpan.textContent = packageName;
+        });
+    }
+});
+</script>
+{% endblock %}
+

@@ -1,0 +1,150 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Yeni Hesap Oluşturma Sayfası (register.html)
+Sürüm: v6.0 (Akademi Yükseltmesi)
+
+BU ŞABLON, "AKADEMİYİ HALKA AÇMA" GÖREVİMİZ İÇİN GÜNCELLENMİŞTİR.
+ARTIK BİR "PERSONEL" KAYIT SAYFASI DEĞİL, SİTEYE ÜYE OLMAK İSTEYEN
+NORMAL BİR "KULLANICI" (ÖĞRENCİ) KAYIT SAYFASIDIR.
+
+YENİLİKLER VE GÜÇLENDİRMELER (v6.0):
+1.  ANLAM GÜNCELLEMESİ:
+    Soldaki marka panelindeki ve sağdaki form başlığındaki tüm metinler,
+    "ekibe katılma" veya "kariyer" odaklı olmaktan çıkarılıp,
+    "hesap oluşturma" ve "akademiye katılma" odaklı hale getirildi.
+    Bu, `auth_routes.py` dosyasında yapacağımız ve bu formu varsayılan
+    'Kullanıcı' rolüne atayacağımız değişiklikle tam uyumludur.
+
+2.  MERKEZİ JS MİMARİSİ (KORUNDU):
+    Formun tüm interaktif özellikleri (`password-strength-bar`,
+    `password-match-text` vb.) hâlâ `static/js/main.js`
+    içindeki `KuwamedyaApp.Auth` modülü tarafından merkezi olarak
+    yönetilmektedir. Bu "top seviye" mimariyi koruyoruz.
+=================================================================== -->
+
+<!-- `layout.html` dosyasındaki 'title' bloğunu doldurur. -->
+{% block title %}Yeni Hesap Oluştur - Kuwamedya Akademisi{% endblock %}
+
+<!-- `layout.html` dosyasındaki 'description' bloğunu doldurur. (SEO) -->
+{% block description %}Kuwamedya Akademisi'ne katılmak, kursları almak ve gelişiminize başlamak için hemen ücretsiz bir hesap oluşturun.{% endblock %}
+
+<!-- Ana içerik bloğu -->
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+
+        <!-- =================================================================== -->
+        <!-- 1. SOL SÜTUN - MARKA VE KARŞILAMA MESAJI (METİNLER GÜNCELLENDİ) -->
+        <!-- =================================================================== -->
+        <div class="auth-brand-panel" style="background-image: url('{{ url_for('static', filename='images/register_bg.jpg') }}');">
+            <div data-aos="fade-right" data-aos-duration="800">
+                <a href="{{ url_for('main.home') }}" class="auth-logo d-flex align-items-center justify-content-center">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="KUWAMEDYA" height="36" class="me-2" style="object-fit: contain;">
+                    <span>KUWAMEDYA</span>
+                </a>
+                
+                <!-- GÜNCELLENMİŞ METİNLER (v6.0) -->
+                <span class="auth-welcome-text">Öğrenmeye Başlayın</span>
+                <h1 class="auth-brand-title">Gelişiminize Yatırım Yapın.</h1>
+                <p class="auth-brand-subtitle">Kuwamedya Akademisi'ne katılarak sektör uzmanlarından en güncel bilgileri öğrenin, sertifikalar kazanın ve potansiyelinizi keşfedin.</p>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- 2. SAĞ SÜTUN - KAYIT FORMU (METİNLER GÜNCELLENDİ) -->
+        <!-- =================================================================== -->
+        <div class="auth-form-panel">
+            <div class="auth-form-container" data-aos="fade-left" data-aos-duration="800">
+                
+                <div class="text-center text-lg-start">
+                    <!-- GÜNCELLENMİŞ METİNLER (v6.0) -->
+                    <h3 class="auth-heading mb-2">Ücretsiz Hesap Oluşturun</h3>
+                    <p class="text-muted mb-4">Akademi'ye tam erişim için bilgilerinizi girin.</p>
+                </div>
+                
+                <form method="POST" action="" novalidate class="needs-validation">
+                    {{ form.hidden_tag() }} <!-- CSRF Güvenlik Kodu -->
+
+                    <!-- Ad Soyad ve Kullanıcı Adı (yan yana) -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <div class="form-floating">
+                                {{ form.name(class="form-control" + (" is-invalid" if form.name.errors else ""), placeholder="Ad Soyad") }}
+                                {{ form.name.label() }}
+                                {% if form.name.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.name.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                             <div class="form-floating">
+                                {{ form.username(class="form-control" + (" is-invalid" if form.username.errors else ""), placeholder="Kullanıcı Adı") }}
+                                {{ form.username.label() }}
+                                {% if form.username.errors %}
+                                <div class="invalid-feedback">
+                                    {% for error in form.username.errors %}<span>{{ error }}</span>{% endfor %}
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- E-posta Alanı -->
+                    <div class="form-floating mb-3">
+                        {{ form.email(class="form-control" + (" is-invalid" if form.email.errors else ""), placeholder="E-posta Adresiniz") }}
+                        {{ form.email.label() }}
+                        {% if form.email.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.email.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Şifre Alanı -->
+                    <div class="form-floating mb-1">
+                        <!-- id="password" -> main.js tarafından kullanılır -->
+                        {{ form.password(class="form-control" + (" is-invalid" if form.password.errors else ""), id="password", placeholder="Şifre") }}
+                        {{ form.password.label() }}
+                        {% if form.password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+                    
+                    <!-- İnteraktif Şifre Gücü Göstergesi (main.js tarafından yönetilir) -->
+                    <div class="progress mb-1" style="height: 5px;">
+                        <div id="password-strength-bar" class="progress-bar" role="progressbar" style="width: 0%;"></div>
+                    </div>
+                    <small id="password-strength-text" class="form-text d-block mb-3"></small>
+
+                    <!-- Şifre Doğrulama Alanı (main.js tarafından yönetilir) -->
+                    <div class="form-floating mb-3">
+                        {{ form.confirm_password(class="form-control" + (" is-invalid" if form.confirm_password.errors else ""), id="confirm_password", placeholder="Şifreyi Doğrula") }}
+                        {{ form.confirm_password.label() }}
+                        <small id="password-match-text" class="form-text d-block mt-1"></small>
+                        {% if form.confirm_password.errors %}
+                        <div class="invalid-feedback">
+                            {% for error in form.confirm_password.errors %}<span>{{ error }}</span>{% endfor %}
+                        </div>
+                        {% endif %}
+                    </div>
+
+                    <!-- Kayıt Butonu -->
+                    <div class="d-grid mb-3">
+                        {{ form.submit(class="btn btn-primary btn-lg fw-bold") }}
+                    </div>
+
+                    <!-- Giriş Sayfasına Yönlendirme -->
+                    <div class="text-center mt-3">
+                        <p class="small text-muted">Zaten bir hesabınız var mı? <a href="{{ url_for('auth.login') }}" class="fw-bold text-decoration-none">Giriş Yapın</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

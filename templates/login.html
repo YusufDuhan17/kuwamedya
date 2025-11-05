@@ -1,0 +1,109 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Giriş Sayfası (login.html)
+Sürüm: v6.1 (Akademi Yükseltmesi - 404 Düzeltmesi)
+
+YENİLİKLER VE GÜÇLENDİRMELER (v6.1):
+1.  HATA DÜZELTMESİ (404 Not Found - Konsol Hatası):
+    - Terminal logları ve video, 'login_bg.jpg' adlı arka plan
+      resminin 'static/images/' klasöründe bulunmadığını (404) gösterdi.
+    - KOD DÜZELTMESİ:
+      Sol paneldeki 'style' özelliği (`style="background-image: ..."`)
+      tamamen kaldırılmıştır.
+    - Arka plan artık 'style.css' dosyasından gelen genel
+      'auth-brand-panel' stili (koyu gradyan) ile yönetilmektedir.
+      Bu, 404 hatasını ve konsol kirliliğini giderir.
+
+2.  V6.0 ÖZELLİKLERİ KORUNDU:
+    - 'auth_routes.py' (v6.1) içindeki rol bazlı akıllı yönlendirme ile
+      tam uyumludur. (Kullanıcı Akademi'ye, Personel Panel'e yönlenir).
+    - Google OAuth butonu aktiftir.
+    - 'main.js' tarafından yönetilen merkezi şifre gösterme/gizleme.
+=================================================================== -->
+
+<!-- `layout.html` dosyasındaki 'title' bloğunu doldurur. -->
+{% block title %}Giriş Yap - Kuwamedya Yönetim Paneli{% endblock %}
+
+<!-- `layout.html` dosyasındaki 'description' bloğunu doldurur. (SEO) -->
+{% block description %}Kuwamedya yönetim ve performans paneline erişim için güvenli, modern ve interaktif giriş ekranı.{% endblock %}
+
+<!-- Ana içerik bloğu -->
+{% block content %}
+<div class="auth-page-wrapper">
+    <div class="auth-container">
+
+        <!-- =================================================================== -->
+        <!-- 1. SOL SÜTUN - MARKA VE KARŞILAMA MESAJI -->
+        <!-- GÜNCELLEME (v6.1): 404 hatasını önlemek için 'style' kaldırıldı. -->
+        <!-- =================================================================== -->
+        <div class="auth-brand-panel">
+            <div data-aos="fade-right" data-aos-duration="800">
+                <a href="{{ url_for('main.home') }}" class="auth-logo d-flex align-items-center justify-content-center">
+                    <img src="{{ url_for('static', filename='images/logo.png') }}" alt="KUWAMEDYA" height="36" class="me-2" style="object-fit: contain;">
+                    <span>KUWAMEDYA</span>
+                </a>
+                <span class="auth-welcome-text">Tekrar Hoş Geldin!</span>
+                <h1 class="auth-brand-title">Fikirleri Gerçeğe Dönüştürdüğümüz Yer.</h1>
+                <p class="auth-brand-subtitle">Başarının bir parçası olmak için giriş yapın ve hedeflerinize doğru bir adım daha atın.</p>
+            </div>
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- 2. SAĞ SÜTUN - GİRİŞ FORMU -->
+        <!-- =================================================================== -->
+        <div class="auth-form-panel">
+            <div class="auth-form-container" data-aos="fade-left" data-aos-duration="800">
+                
+                <div class="text-center text-lg-start">
+                    <h3 class="auth-heading mb-2">Panel Girişi</h3>
+                    <p class="text-muted mb-4">Lütfen devam etmek için bilgilerinizi girin.</p>
+                </div>
+
+                {% include 'flash_messages.html' %}
+
+                <form method="POST" action="" novalidate class="needs-validation">
+                    {{ form.hidden_tag() }}
+
+                    <!-- E-posta Alanı (Floating Label ile) -->
+                    <div class="form-floating mb-3">
+                        {{ form.email(class="form-control", id="floatingEmail", placeholder="E-posta Adresiniz") }}
+                        {{ form.email.label(for="floatingEmail") }}
+                    </div>
+
+                    <!-- Şifre Alanı (Floating Label ve Göz İkonu ile) -->
+                    <div class="form-floating mb-3">
+                        {{ form.password(class="form-control", id="floatingPassword", placeholder="Şifreniz") }}
+                        {{ form.password.label(for="floatingPassword") }}
+                        <span id="togglePassword" class="password-toggle-icon">
+                            <i class="fas fa-eye"></i>
+                        </span>
+                    </div>
+
+                    <!-- Ekstra Seçenekler (Beni Hatırla & Şifremi Unuttum) -->
+                    <div class="d-flex justify-content-between align-items-center mb-4">
+                        <div class="form-check">
+                            {{ form.remember(class="form-check-input") }}
+                            {{ form.remember.label(class="form-check-label") }}
+                        </div>
+                        <a href="#" class="small text-muted text-decoration-none forgot-password-link">Şifremi Unuttum?</a>
+                    </div>
+
+                    <!-- Giriş Butonu -->
+                    <div class="d-grid mb-3">
+                        {{ form.submit(class="btn btn-primary btn-lg fw-bold") }}
+                    </div>
+
+                    <!-- Kayıt Sayfasına Yönlendirme -->
+                    <div class="text-center mt-4">
+                        <p class="small text-muted">Hesabınız yok mu? <a href="{{ url_for('auth.register') }}" class="fw-bold text-decoration-none">Hemen Kayıt Olun</a></p>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+{% block scripts %}{% endblock %}

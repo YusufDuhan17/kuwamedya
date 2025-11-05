@@ -1,0 +1,63 @@
+# Sanal Ortam Klasörü
+/venv
+
+# Python Cache Dosyaları
+__pycache__/
+*.pyc
+
+# Gizli Bilgileri İçeren Ortam Değişkeni Dosyası
+.env
+ADMIN_BILGILERI.txt
+*.env.local
+*.env.production
+# NOT: .env.example dosyası git'e eklenmeli (örnek dosya)
+
+# VS Code Ayar Klasörü
+.vscode/
+.idea/
+
+# Veritabanı Dosyası ve instance klasörü
+*.db
+*.sqlite
+*.sqlite3
+/instance/
+/kuwamedya.db
+
+# Log dosyaları
+logs/
+*.log
+*.log.*
+
+# Python Cache ve geçici dosyalar
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+
+# Sanal Ortam
+venv/
+env/
+ENV/
+.venv
+
+# İşletim Sistemi dosyaları
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Upload edilmiş dosyalar (kullanıcı yüklemeleri)
+static/uploads/*
+!static/uploads/.gitkeep
+
+# Production config dosyaları
+gunicorn_config.py
+*.service
+
+# Test dosyaları ve coverage
+.pytest_cache/
+.coverage
+htmlcov/

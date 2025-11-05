@@ -1,0 +1,76 @@
+{% extends "panel/_panel_layout.html" %}
+
+{% block title %}Paket {{ 'Düzenle' if package else 'Oluştur' }} | Kuwamedya{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Paket {{ 'Düzenle' if package else 'Oluştur' }}</h1>
+    <div class="d-flex gap-2">
+        <a href="{{ url_for('admin.package_list') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Geri Dön</a>
+    </div>
+    </div>
+
+<div class="card bg-dark border-secondary shadow-lg" data-aos="fade-up">
+    <div class="card-body p-4 p-lg-5">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.name.label(class_='form-label') }}
+                        {{ form.name(class_='form-control') }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        {{ form.order.label(class_='form-label') }}
+                        {{ form.order(class_='form-control') }}
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="mb-3">
+                        {{ form.is_popular.label(class_='form-label d-block') }}
+                        {{ form.is_popular(class_='form-check-input') }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.price_monthly.label(class_='form-label') }}
+                        {{ form.price_monthly(class_='form-control') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.price_yearly.label(class_='form-label') }}
+                        {{ form.price_yearly(class_='form-control') }}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.description.label(class_='form-label') }}
+                        {{ form.description(class_='form-control', rows=4) }}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.features.label(class_='form-label') }}
+                        {{ form.features(class_='form-control', rows=6) }}
+                        <small class="text-muted">Her özelliği yeni satıra yazın</small>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                {{ form.submit(class_='btn btn-primary') }}
+                <a href="{{ url_for('admin.package_list') }}" class="btn btn-outline-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+

@@ -1,0 +1,190 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - İnteraktif Sınav Sayfası (quiz.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, BİR DERSE AİT SINAVI, KULLANICIYI İÇİNE ÇEKEN, OYUNLAŞTIRILMIŞ
+VE İNTERAKTİF BİR DENEYİME DÖNÜŞTÜRÜR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MİMARİ GÜNCELLEMESİ (v5.0):
+    Bu şablon artık 'templates/panel/' klasöründe yer alarak ve
+    'panel/_panel_layout.html' dosyasından miras alarak, personel
+    panelinin bir parçası olduğunu netleştirir.
+
+2.  MERKEZİ JAVASCRIPT MİMARİSİ (DRY PRENSİBİ - v5.0 DEV YÜKSELTME):
+    Bu dosyanın içindeki TÜM JavaScript mantığı (loadQuestion, handleAnswerClick,
+    playSound, showResults vb.) kaldırılmıştır. Bu fonksiyonlar artık projenin
+    ana 'static/js/main.js' dosyası içindeki 'KuwamedyaApp.Academy' modülü
+    tarafından merkezi olarak yönetilmektedir.
+
+3.  MERKEZİ TETİKLEYİCİ (v5.0):
+    Bu dosyanın en altındaki 'block scripts' bölümü, artık sadece
+    backend'den gelen 'questions' JSON verisini 'window.quizQuestions'
+    adlı bir global değişkene atayan ve ardından 'main.js'deki
+    'KuwamedyaApp.Academy.initQuiz()' fonksiyonunu tetikleyen
+    küçük bir "başlatıcı" script içerir.
+
+4.  TAM BACKEND ENTEGRASYONU:
+    HTML yapısı (ID'ler, formlar, modallar), 'main.js'deki merkezi
+    script'in ve 'academy_routes.py'deki 'submit_quiz' rotasının
+    beklediği tüm gereksinimleri (örn: 'submit-score-form') karşılar.
+=================================================================== -->
+
+<!-- 
+  BACKEND NOTU (academy_routes.py -> lesson_view() veya quiz_view() rotası):
+  Bu şablonun çalışması için 'quiz' (Quiz objesi), 'lesson' (Lesson objesi),
+  'course' (Course objesi) ve en önemlisi 'questions' (quiz.questions
+  alanından 'json.loads' ile alınmış Python listesi) değişkenlerinin
+  render_template'e gönderilmesi GEREKİR.
+-->
+
+{% block title %}Sınav: {{ quiz.title }} | {{ lesson.title }}{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+<div class="quiz-page-container" data-aos="fade-in">
+
+    <!-- Sınav başlığı ve navigasyon -->
+    <div class="quiz-header text-center mb-4">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb justify-content-center bg-transparent p-0">
+                <li class="breadcrumb-item"><a href="{{ url_for('academy.academy_home') }}">Akademi</a></li>
+                <li class="breadcrumb-item"><a href="{{ url_for('academy.course_detail', course_id=course.id) }}">{{ course.title }}</a></li>
+                <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+            </ol>
+        </nav>
+        <h1 class="display-5 fw-bold text-white">{{ quiz.title }}</h1>
+        <p class="lead text-muted">Bilgilerini test etme zamanı!</p>
+    </div>
+
+    <!-- Ana Sınav Kartı -->
+    <!-- 
+      Tüm bu ID'ler ('quiz-card', 'progress-bar', 'question-counter', 
+      'question-text', 'answer-options', 'next-btn') 'main.js' dosyasındaki
+      'KuwamedyaApp.Academy.initQuiz' fonksiyonu tarafından kullanılır.
+    -->
+    <div class="card bg-dark border-secondary shadow-lg mx-auto" id="quiz-card" style="max-width: 800px;">
+        <div class="card-body p-lg-5">
+            <!-- İlerleme Çubuğu ve Soru Sayacı -->
+            <div class="quiz-progress-section mb-4">
+                <div class="d-flex justify-content-between align-items-center mb-2 small">
+                    <span class="fw-bold">İlerleme</span>
+                    <span id="question-counter" class="text-muted"></span>
+                </div>
+                <div class="progress" style="height: 10px;">
+                    <div id="progress-bar" class="progress-bar bg-primary" role="progressbar" style="width: 0%;"></div>
+                </div>
+            </div>
+            <hr class="border-secondary">
+            
+            <!-- Soru Metni ve Cevap Seçenekleri -->
+            <div id="question-area" class="my-4">
+                <h3 id="question-text" class="fw-bold text-center mb-4">Soru Yükleniyor...</h3>
+                <div id="answer-options" class="list-group">
+                    <!-- Cevaplar 'main.js' ile buraya eklenecek -->
+                </div>
+                <!-- Açıklama alanı (cevap verildikten sonra gösterilir) -->
+                <div id="answer-explanation" class="mt-4 d-none">
+                    <div class="alert alert-info bg-info bg-opacity-10 border-info border-opacity-50">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <strong>Açıklama:</strong> <span id="explanation-text"></span>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- İlerleme Butonu Alanı -->
+            <div id="navigation-area" class="text-center mt-4">
+                 <button id="next-btn" class="btn btn-primary btn-lg w-100 d-none">Sonraki Soru <i class="fas fa-arrow-right ms-2"></i></button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- SONUÇ MODAL'I VE GİZLİ FORM -->
+<!-- =================================================================== -->
+<!-- 
+  Bu modal, 'main.js' tarafından 'showResults()' fonksiyonu ile tetiklenir.
+  İçeriği (ikon, başlık, mesaj) skora göre dinamik olarak doldurulur.
+-->
+<div class="modal fade" id="quiz-result-modal" data-bs-backdrop="static" data-bs-keyboard="false">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <!-- 
+              Skoru backend'e gönderecek GİZLİ FORM.
+              'main.js' içindeki 'handleAnswerClick' fonksiyonu,
+              kullanıcının cevaplarını (question-0, question-1 vb.)
+              bu forma 'input:hidden' olarak ekler.
+            -->
+            <form id="submit-score-form" method="POST" action="{{ url_for('academy.submit_quiz', quiz_id=quiz.id) }}">
+                <div class="modal-header border-secondary text-center">
+                    <h5 class="modal-title w-100 fw-bold" id="quizResultModalLabel">Sınav Sonuçları</h5>
+                </div>
+                <div class="modal-body text-center p-4">
+                    <i id="result-icon" class="fas fa-4x mb-3"></i>
+                    <h3 id="result-title" class="fw-bold"></h3>
+                    <p id="result-message" class="text-muted"></p>
+                    <div class="my-4">
+                        <p class="mb-1">Skorun</p>
+                        <h1 id="score-text" class="display-4 fw-bold text-primary"></h1>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary justify-content-center">
+                    <button id="retry-quiz-btn" type="button" class="btn btn-outline-secondary"><i class="fas fa-redo-alt me-2"></i>Tekrar Dene</button>
+                    <!-- 
+                      Bu buton, formu 'academy.submit_quiz' rotasına gönderir
+                      ve backend'de 'QuizAttempt' kaydı oluşturulmasını sağlar.
+                    -->
+                    <button type="submit" form="submit-score-form" class="btn btn-primary">
+                        <i class="fas fa-save me-2"></i>Sonuçları Kaydet ve Derse Dön
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+
+<!-- =================================================================== -->
+<!-- SAYFAYA ÖZEL JAVASCRIPT (KUSURSUZ v5.0 - MERKEZİ TETİKLEYİCİ) -->
+<!-- =================================================================== -->
+{% block scripts %}
+<!-- Tone.js kütüphanesi (ses efektleri için 'main.js' tarafından kullanılır) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.7.77/Tone.js"></script>
+<script>
+// KUSURSUZLUK GÜNCELLEMESİ (v5.0):
+// Tüm quiz mantığı (loadQuestion, handleAnswerClick vb.) 'static/js/main.js' dosyasına taşındı.
+// Bu script bloğu, sadece backend'den gelen soruları 'main.js'deki merkezi sisteme aktarır ve onu tetikler.
+document.addEventListener("DOMContentLoaded", () => {
+    try {
+        // 1. Adım: Backend'den gelen 'questions' listesini (Jinja2) bir global JS değişkenine aktar.
+        // 'window.quizQuestions' değişkeni, 'main.js' içindeki 'KuwamedyaApp.Academy.initQuiz'
+        // fonksiyonu tarafından okunacaktır.
+        // '|tojson|safe' filtresi, Python listesini güvenli bir şekilde JavaScript dizisine dönüştürür.
+        window.quizQuestions = {{ questions|tojson|safe }};
+
+        if (!window.quizQuestions || window.quizQuestions.length === 0) {
+            // Backend'den soru gelmezse veya boş gelirse hata fırlat.
+            throw new Error("Sınav soruları boş veya yüklenemedi.");
+        }
+        
+        // 2. Adım: 'main.js' içindeki ana Quiz motorunu başlat.
+        // Bu fonksiyon, 'window.quizQuestions' değişkenini otomatik olarak bulup kullanacaktır.
+        KuwamedyaApp.Academy.initQuiz();
+
+    } catch (e) {
+        console.error("Kuwamedya Quiz Motoru başlatılamadı:", e);
+        // Kullanıcıya hata göster
+        const quizArea = document.getElementById('question-area');
+        if (quizArea) {
+            quizArea.innerHTML = '<div class="alert alert-danger text-center">Sınav soruları yüklenirken kritik bir hata oluştu. Lütfen yöneticiyle iletişime geçin.</div>';
+        }
+    }
+});
+</script>
+{% endblock %}

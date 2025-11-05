@@ -1,0 +1,58 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - 404 Sayfa Bulunamadı (404.html)
+
+BU ŞABLON, GEÇERSİZ BİR URL GİRİLDİĞİNDE VEYA MEVCUT OLMAYAN BİR
+SAYFAYA GİDİLDİĞİNDE KULLANICIYA GÖSTERİLİR.
+
+YENİLİKLER VE "DONANIMLI" ÖZELLİKLER:
+1.  KULLANICI DOSTU VE YARDIMCI TASARIM: Sayfa, kullanıcıyı korkutmak
+    yerine, ne olduğunu anlatan samimi bir mesaj ve ona yardımcı olacak
+    net seçenekler sunar.
+2.  PROFESYONEL VE MARKAYA UYGUN GÖRSEL KİMLİK: Tasarım, projenin genel
+    modern ve karanlık temasını sürdürür. Büyük "404" yazısı ve ikonlar,
+    sayfanın amacını anında belli eder.
+3.  ÇOKLU EYLEM SEÇENEKLERİ: Kullanıcıya sadece "Ana Sayfaya Dön" demekle
+    kalmaz, aynı zamanda "Destek ile İletişime Geç" ve "Site İçinde Ara"
+    gibi alternatif yollar sunarak sitede kalmasını teşvik eder.
+4.  ANİMASYONLU ELEMENTLER: Sayfadaki elementler, `data-aos` animasyonları
+    ile ekrana yerleşerek daha dinamik bir görünüm kazanır.
+=================================================================== -->
+
+{% block title %}Sayfa Bulunamadı | Kuwamedya{% endblock %}
+
+{% block content %}
+<div class="error-page-wrapper">
+    <div class="container text-center">
+        
+        <div data-aos="zoom-in">
+            <i class="fas fa-ghost fa-7x text-primary mb-4 error-icon"></i>
+            <h1 class="display-1 fw-bold error-code">404</h1>
+            <h2 class="fw-bold mb-3">Oops! Bu Sayfa Galiba Kayboldu.</h2>
+            <p class="lead text-muted mb-5 col-lg-8 mx-auto">
+                Aradığınız sayfayı bulamadık. Belki de hiç var olmadı, adı değişti ya da galaksinin başka bir köşesine ışınlandı. Endişelenmeyin, sizi tekrar yola sokabiliriz.
+            </p>
+        </div>
+        
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center mb-5" data-aos="fade-up" data-aos-delay="200">
+            <!-- ✨ DÜZELTME: `url_for('home')` yerine doğru rota olan `url_for('main.home')` kullanılıyor -->
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary btn-lg px-4 gap-3"><i class="fas fa-home me-2"></i>Ana Sayfaya Dön</a>
+            <a href="{{ url_for('main.home') }}#contact" class="btn btn-outline-secondary btn-lg px-4"><i class="fas fa-envelope me-2"></i>Destek ile İletişime Geç</a>
+        </div>
+
+        <div data-aos="fade-up" data-aos-delay="400">
+            <p class="text-muted">Ya da aradığınızı burada bulmayı deneyin:</p>
+            <div class="row justify-content-center">
+                <div class="col-lg-6">
+                    <form class="d-flex">
+                        <input class="form-control form-control-lg me-2 bg-dark border-secondary text-white" type="search" placeholder="Site içinde ara..." aria-label="Search">
+                        <button class="btn btn-primary btn-lg" type="submit">Ara</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,237 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Ders İzleme Sayfası (lesson.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, BİR KURS İÇERİSİNDEKİ TEK BİR DERSİN GÖRÜNTÜLENDİĞİ,
+ÖĞRENMENİN GERÇEKLEŞTİĞİ SANAL SINIFTIR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MİMARİ GÜNCELLEMESİ (v5.0):
+    Bu şablon artık 'templates/panel/' klasöründe yer alarak ve
+    'panel/_panel_layout.html' dosyasından miras alarak, personel
+    panelinin bir parçası olduğunu netleştirir.
+
+2.  ODAKLANMIŞ ÖĞRENME ARAYÜZÜ:
+    Sayfa, sol tarafta ana içerik (video, metin vb.) ve sağ tarafta kurs
+    navigasyonu (müfredat) olmak üzere iki sütunlu modern bir yerleşimle
+    tasarlanmıştır.
+
+3.  AKILLI MÜFREDAT LİSTESİ (v5.0 GÜÇLENDİRMESİ):
+    Sağdaki müfredat listesi, 'course_detail.html' ile %100 aynı
+    mantığı kullanır. 'models.py' içindeki 'enrollment.is_lesson_completed()'
+    metodunu çağırarak tamamlanan dersleri 'onay ikonu' ile gösterir.
+    Henüz tamamlanmamış dersleri ise 'lesson.lesson_type' (Video, Metin, Quiz)
+     özelliğine göre 'oynat', 'dosya' veya 'sınav' ikonu ile gösterir.
+
+4.  TAM MODEL ENTEGRASYONU (DRY PRENSİBİ):
+    "Önceki Ders" ve "Sonraki Ders" butonları, 'models.py' içindeki
+    'course.get_prev_lesson()' ve 'course.get_next_lesson()'
+    yardımcı metotlarıyla akıllı bir şekilde çalışır.
+=================================================================== -->
+
+{% block title %}Ders: {{ lesson.title }} | {{ course.title }}{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+<div class="lesson-view-page" data-aos="fade-in">
+    <div class="row g-4">
+        <!-- =================================================================== -->
+        <!-- 1. SOL SÜTUN - ANA DERS İÇERİĞİ -->
+        <!-- =================================================================== -->
+        <div class="col-lg-8 col-xl-9">
+            <!-- Navigasyon (Breadcrumb) -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('academy.academy_home') }}">Akademi</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('academy.course_detail', course_id=course.id) }}">{{ course.title }}</a></li>
+                        <li class="breadcrumb-item active" aria-current="page">{{ lesson.title }}</li>
+                    </ol>
+                </nav>
+                <h1 class="text-white fw-bold display-6">{{ lesson.title }}</h1>
+            </div>
+
+            <!-- 
+              DİNAMİK İÇERİK BLOKU
+              Dersin tipine göre (Video, Metin, Quiz) farklı içerik gösterilir.
+              Şu an 'quiz.html' ayrı bir şablon olduğu için burası
+              Video ve Metin tiplerini yönetir.
+            -->
+            
+            <!-- A. VİDEO DERSİ İSE OYNATICIYI GÖSTER -->
+            {% if lesson.lesson_type == 'Video' %}
+            <div class="video-player-wrapper shadow-lg mb-4 rounded overflow-hidden">
+                <div class="ratio ratio-16x9">
+                    <!-- 
+                      YouTube video ID'si 'lesson.video_url' alanından çekilir.
+                      Eğer boşsa, varsayılan bir video (Rick Astley) gösterilir.
+                    -->
+                    <iframe src="https://www.youtube.com/embed/{{ lesson.video_url | default('dQw4w9WgXcQ') }}?autoplay=1&rel=0&modestbranding=1" 
+                            title="YouTube video player" 
+                            frameborder="0" 
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" 
+                            allowfullscreen>
+                    </iframe>
+                </div>
+            </div>
+            {% endif %}
+            
+            <!-- B. İÇERİĞİ GÖSTER (Tüm ders tipleri için) -->
+            {% if lesson.content and lesson.content.strip() %}
+            <div class="card bg-dark border-secondary shadow-lg mb-4 lesson-content-card">
+                <div class="card-body p-4 p-lg-5">
+                    <div class="prose-styles">
+                        <!-- 
+                          'lesson.content' veritabanından gelen HTML/Metin içeriğidir.
+                          '|safe' filtresi, HTML etiketlerinin (örn: <strong>, <ul>)
+                          düz metin olarak değil, render edilerek gösterilmesini sağlar.
+                        -->
+                        {{ lesson.content | safe }}
+                    </div>
+                    
+                    <!-- Dersi Tamamla Butonu (Quiz hariç, içeriğin ortasına) -->
+                    {% if lesson.lesson_type != 'Quiz' and enrollment %}
+                    <div class="text-center mt-5 mb-3">
+                        <form method="POST" action="{{ url_for('academy.complete_lesson', lesson_id=lesson.id) }}" class="d-inline">
+                            <button type="submit" class="btn btn-success btn-lg px-5">
+                                <i class="fas fa-check-circle me-2"></i>Dersi Tamamla
+                            </button>
+                        </form>
+                        <p class="text-muted small mt-2 mb-0">Dersi tamamladığınızda otomatik olarak bir sonraki derse geçeceksiniz.</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+            {% else %}
+            <!-- Boş içerik durumu -->
+            <div class="card bg-dark border-secondary shadow-lg mb-4 lesson-empty-content">
+                <div class="card-body p-5 text-center">
+                    <i class="fas fa-file-alt fa-4x mb-3 text-muted opacity-50"></i>
+                    <h5 class="text-muted mb-2">Bu ders için içerik henüz eklenmemiş</h5>
+                    <p class="text-muted small mb-0">Ders içeriği yakında eklenecektir.</p>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ders Navigasyon Butonları -->
+            <div class="card bg-dark border-secondary mb-4">
+                <div class="card-body d-flex flex-wrap justify-content-between align-items-center gap-2">
+                    <!-- 
+                      'models.py' içindeki 'course.get_prev_lesson()' metodunu çağırır.
+                      Eğer 'None' (yani ilk ders) dönerse, 'disabled' sınıfı alır.
+                    -->
+                    {% set prev_lesson = course.get_prev_lesson(lesson.order) %}
+                    <a href="{{ url_for('academy.lesson_view', lesson_id=prev_lesson.id) if prev_lesson else '#' }}" 
+                       class="btn btn-outline-secondary {% if not prev_lesson %}disabled{% endif %}"><i class="fas fa-chevron-left me-2"></i>Önceki Ders</a>
+                    
+                    <!-- 
+                      'models.py' içindeki 'course.get_next_lesson()' metodunu çağırır.
+                      Eğer 'None' (yani son ders) dönerse, 'Kursu Bitir' yazar ve
+                      kurs detay sayfasına yönlenir.
+                    -->
+                    {% set next_lesson = course.get_next_lesson(lesson.order) %}
+                    <a href="{{ url_for('academy.lesson_view', lesson_id=next_lesson.id) if next_lesson else url_for('academy.course_detail', course_id=course.id) }}" 
+                       class="btn btn-primary {% if not next_lesson %}btn-warning{% endif %}">
+                       {% if next_lesson %}
+                           Sonraki Ders<i class="fas fa-chevron-right ms-2"></i>
+                       {% else %}
+                           Kursu Bitir<i class="fas fa-trophy ms-2"></i>
+                       {% endif %}
+                    </a>
+                </div>
+            </div>
+
+            <!-- Zengin İçerik Sekmeleri (Video ise ders notları burada görünür) -->
+            {% if lesson.lesson_type == 'Video' %}
+            <div class="card bg-dark border-secondary shadow-lg">
+                <div class="card-header bg-darker border-secondary">
+                    <ul class="nav nav-tabs card-header-tabs">
+                        <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#notes"><i class="fas fa-file-alt me-2"></i>Ders Notları</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#resources"><i class="fas fa-download me-2"></i>Kaynaklar</a></li>
+                        <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#discussion"><i class="fas fa-comments me-2"></i>Tartışma</a></li>
+                    </ul>
+                </div>
+                <div class="card-body p-4">
+                    <div class="tab-content">
+                        <!-- Ders Notları İçeriği -->
+                        <div class="tab-pane fade show active" id="notes">
+                            {% if lesson.content and lesson.content.strip() %}
+                            <div class="prose-styles">
+                                {{ lesson.content | safe }}
+                            </div>
+                            {% else %}
+                            <div class="text-center p-4 text-muted">
+                                <i class="fas fa-file-alt fa-3x mb-3 opacity-50"></i>
+                                <p>Bu ders için notlar henüz eklenmemiş.</p>
+                            </div>
+                            {% endif %}
+                        </div>
+                        <!-- Kaynaklar İçeriği (Gelecek geliştirme için placeholder) -->
+                        <div class="tab-pane fade" id="resources">
+                           <h5 class="fw-bold">İndirilebilir Kaynaklar</h5>
+                           <p>Bu dersle ilgili aşağıdaki kaynakları indirerek öğrenme sürecinizi pekiştirebilirsiniz.</p>
+                           <ul class="list-group">
+                               <li class="list-group-item bg-darker d-flex justify-content-between align-items-center"><span><i class="fas fa-file-pdf text-danger me-2"></i>Ders Sunumu (PDF)</span><a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> İndir</a></li>
+                               <li class="list-group-item bg-darker d-flex justify-content-between align-items-center"><span><i class="fas fa-file-code text-info me-2"></i>Örnek Kod Dosyaları (ZIP)</span><a href="#" class="btn btn-sm btn-outline-primary"><i class="fas fa-download me-1"></i> İndir</a></li>
+                           </ul>
+                        </div>
+                        <!-- Tartışma İçeriği (Gelecek geliştirme için placeholder) -->
+                        <div class="tab-pane fade" id="discussion">
+                           <div class="text-center p-4 text-muted">Tartışma özelliği yakında eklenecektir.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+
+        <!-- =================================================================== -->
+        <!-- 2. SAĞ SÜTUN - KURS NAVİGASYONU (MÜFREDAT) -->
+        <!-- =================================================================== -->
+        <div class="col-lg-4 col-xl-3">
+            <div class="card bg-dark border-secondary shadow-lg sticky-top" style="top: 100px;">
+                <div class="card-header bg-darker border-secondary">
+                    <h5 class="fw-bold mb-0">Kurs İçeriği</h5>
+                </div>
+                <div class="list-group list-group-flush course-navigation">
+                    <!-- 
+                      GÜÇLENDİRME (v5.0):
+                      Bu bölüm, 'course_detail.html' şablonundaki mantıkla
+                      birebir aynı olacak şekilde güncellendi.
+                      'is_lesson_completed' metodu ve dinamik ikonlar kullanılıyor.
+                    -->
+                    {% for nav_lesson in course.lessons.order_by('order').all() %}
+                    {% set is_completed = enrollment and enrollment.is_lesson_completed(nav_lesson.id) %}
+                    
+                    <a href="{{ url_for('academy.lesson_view', lesson_id=nav_lesson.id) }}" 
+                       class="list-group-item list-group-item-action bg-dark text-white p-3 d-flex justify-content-between align-items-center {% if nav_lesson.id == lesson.id %}active{% endif %}">
+                        
+                        <div class="d-flex align-items-center">
+                            <!-- 1. Ders tamamlanmışsa: Onay ikonu -->
+                            {% if is_completed %}
+                                <i class="fas fa-check-circle fa-fw me-3 fs-5 text-success"></i>
+                            <!-- 2. Ders tamamlanmamışsa: Ders tipine göre ikon -->
+                            {% else %}
+                                {% if nav_lesson.lesson_type == 'Quiz' %}
+                                    <i class="fas fa-vial-circle-check fa-fw me-3 fs-5 text-muted"></i>
+                                {% elif nav_lesson.lesson_type == 'Metin' %}
+                                    <i class="fas fa-file-lines fa-fw me-3 fs-5 text-muted"></i>
+                                {% else %} <!-- Varsayılan: Video -->
+                                    <i class="far fa-play-circle fa-fw me-3 fs-5 text-muted"></i>
+                                {% endif %}
+                            {% endif %}
+                            
+                            <p class="mb-0 fw-bold small">Ders {{ nav_lesson.order }}: {{ nav_lesson.title }}</p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

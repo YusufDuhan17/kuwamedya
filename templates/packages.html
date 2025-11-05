@@ -1,0 +1,237 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Hizmet Paketleri Sayfası (packages.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, AJANSIN SUNDUĞU HİZMETLERİ VE FİYATLANDIRMAYI ŞEFFAF
+BİR ŞEKİLDE ZİYARETÇİYE SUNAR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  TAMAMEN DİNAMİK VE YÖNETİLEBİLİR:
+    Tüm paketler ve özellikleri, `main_routes.py`'den gelen `packages`
+    listesinden dinamik olarak oluşturulur. Admin panelinden bir paket
+    eklendiğinde veya güncellendiğinde bu sayfa anında değişir.
+
+2.  İNTERAKTİF FİYATLANDIRMA (MERKEZİ YÖNETİM):
+    "Aylık / Yıllık Fiyatlandırma" anahtarı (`pricing-toggle-switch`),
+    JavaScript ile anlık olarak fiyatları günceller. Bu mantık,
+    kod tekrarını önlemek için bu dosyadan çıkarılmış ve
+    `static/js/main.js` içindeki `KuwamedyaApp.Vitrin.initPricingToggle`
+    fonksiyonu tarafından merkezi olarak yönetilmektedir.
+
+3.  "POPÜLER PAKET" VURGUSU (BACKEND ENTEGRE):
+    Admin panelinden "popüler" olarak işaretlenen paket (`package.is_popular`
+    model alanı), `style.css`'deki `.popular` sınıfı sayesinde görsel olarak
+    vurgulanır ve müşterinin dikkatini çeker.
+
+4.  DİNAMİK ÖZELLİK LİSTELEME:
+    Paket kartlarındaki özellikler, `models.py`'de `TextArea` olarak
+    tanımlanan `package.features` alanından `split('\n')` metoduyla
+    ayrıştırılarak dinamik bir şekilde liste olarak basılır.
+
+5.  DETAYLI KARŞILAŞTIRMA TABLOSU:
+    Sayfanın en "donanımlı" kısmı! Tüm paketlerin sunduğu özelliklerin
+    yan yana karşılaştırıldığı detaylı bir tablo içerir.
+=================================================================== -->
+
+<!-- Sayfa başlığı (Title) ve SEO Açıklaması (Description) blokları -->
+{% block title %}Hizmet Paketlerimiz - Şeffaf Fiyatlandırma | Kuwamedya{% endblock %}
+{% block description %}İşletmenizin ihtiyaçlarına özel olarak tasarlanmış dijital pazarlama, web yazılımı ve sosyal medya yönetimi hizmet paketlerimizi ve fiyatlarımızı inceleyin.{% endblock %}
+
+<!-- Ana içerik bloğu -->
+{% block content %}
+
+<!-- Sayfa başlığı -->
+<section class="page-header py-5 text-center">
+    <div class="container" data-aos="fade-down">
+        <h1 class="display-4 fw-bold">Hizmet Paketlerimiz</h1>
+        <p class="lead text-muted col-lg-8 mx-auto">İhtiyaçlarınıza özel olarak tasarlanmış, şeffaf ve esnek çözümlerle işletmenizi bir adım öne taşıyın.</p>
+    </div>
+</section>
+
+<!-- Fiyatlandırma bölümü -->
+<section class="pricing-section py-5">
+    <div class="container">
+        
+        <!-- Sadece paket varsa "Aylık/Yıllık" anahtarını göster -->
+        {% if packages %}
+            <div class="row justify-content-center mb-5">
+                <div class="col-md-8 text-center" data-aos="fade-up">
+                    <!-- 
+                      Bu `pricing-toggle-wrap`, `main.js` dosyasındaki
+                      `initPricingToggle` fonksiyonu tarafından hedef alınır.
+                    -->
+                    <div class="pricing-toggle-wrap">
+                        <label class="pricing-toggle">
+                            <input type="checkbox" id="pricing-toggle-switch">
+                            <span class="slider"></span>
+                            <span class="label-monthly">Aylık Fiyatlandırma</span>
+                            <span class="label-yearly">Yıllık Fiyatlandırma <span class="badge ms-2">Tasarruf Edin!</span></span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Fiyatlandırma Kartları -->
+            <div class="row justify-content-center align-items-center">
+                <!-- 
+                  `main_routes.py`'den gelen `packages` listesi üzerinde döngüye girilir.
+                -->
+                {% for package in packages %}
+                <div class="col-lg-4 col-md-6 mb-4" data-aos="fade-up" data-aos-delay="{{ loop.index * 100 }}">
+                    <!-- 
+                      `package.is_popular` True ise, `style.css`'deki
+                      özel stilleri tetiklemek için `.popular` sınıfı eklenir.
+                    -->
+                    <div class="card bg-dark border-secondary h-100 shadow-lg pricing-card {% if package.is_popular %}popular{% endif %}" style="transition: background-color 0.4s ease, border-color 0.4s ease;">
+                        {% if package.is_popular %}
+                        <div class="popular-badge"><i class="fas fa-star me-2"></i>En Popüler</div>
+                        {% endif %}
+                        <div class="card-header text-center border-secondary py-4">
+                            <h3 class="fw-bold">{{ package.name }}</h3>
+                            <p class="text-muted">{{ package.description }}</p>
+                            <!-- 
+                              Fiyat alanı: `main.js` bu iki `span` etiketinin
+                              görünürlüğünü (`d-none`) değiştirir.
+                            -->
+                            <div class="price-wrap">
+                                <span class="price-monthly h1 fw-bold">₺{{ package.price_monthly }}<span class="h5 text-muted">/ay</span></span>
+                                <span class="price-yearly h1 fw-bold d-none">₺{{ package.price_yearly }}<span class="h5 text-muted">/yıl</span></span>
+                            </div>
+                        </div>
+                        <div class="card-body p-4">
+                            <ul class="list-unstyled">
+                                <!-- 
+                                  `models.py`'de `features` alanı alt alta yazılan metinlerdir.
+                                  `split('\n')` ile her satır bir liste elemanına dönüştürülür.
+                                -->
+                                {% for feature in package.get_features_list() %}
+                                <li class="mb-3 d-flex"><i class="fas fa-check-circle text-success me-3 mt-1"></i><span>{{ feature.strip() }}</span></li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        <div class="card-footer border-secondary text-center p-4">
+                            <a href="https://wa.me/905413982042" target="_blank" class="btn {% if package.is_popular %}btn-primary{% else %}btn-outline-primary{% endif %} w-100">İletişime Geç</a>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <!-- "BOŞ DURUM" TASARIMI (Veritabanında hiç paket yoksa) -->
+            <div class="col-12 text-center py-5" data-aos="fade-up">
+                <div class="empty-state-card bg-dark border-secondary p-5 rounded">
+                    <i class="fas fa-box-open fa-4x text-primary mb-4"></i>
+                    <h3 class="fw-bold">Henüz Hizmet Paketi Oluşturulmamış</h3>
+                    <p class="text-muted">İşletmenizin hedeflerine en uygun çözümleri içeren hizmet paketlerimiz yakında burada olacak.</p>
+                    <!-- Admin ise, paket eklemesi için panele yönlendirilir -->
+                    {% if current_user.is_authenticated and current_user.is_admin %}
+                        <hr class="my-4 border-secondary">
+                        <!-- BU ROTA FAZ 2'DE OLUŞTURULACAK -->
+                        <a href="{{ url_for('admin.package_list') }}" class="btn btn-success"><i class="fas fa-plus-circle me-2"></i>Yeni Paket Ekle</a>
+                    {% endif %}
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- DETAYLI KARŞILAŞTIRMA TABLOSU -->
+{% if packages %}
+<section class="comparison-section py-5 bg-dark">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">Paketleri Karşılaştır</h2>
+            <p class="lead text-muted">Tüm özelliklerimizi bir arada görerek size en uygun paketi seçin.</p>
+        </div>
+        <div class="table-responsive" data-aos="fade-up">
+            <table class="table table-bordered comparison-table" style="transition: background-color 0.4s ease, border-color 0.4s ease;">
+                <thead>
+                    <tr>
+                        <th class="feature-col">Özellikler</th>
+                        {% for package in packages %}
+                        <th class="text-center {% if package.is_popular %}bg-primary text-white{% endif %}">{{ package.name }}</th>
+                        {% endfor %}
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- 
+                      Tüm paketlerin özelliklerinden backend'de oluşturulmuş benzersiz özellik listesi.
+                      `main_routes.py`'den gelen `all_features` listesi kullanılır.
+                    -->
+                    {% if all_features %}
+                    {% for feature in all_features %}
+                    <tr>
+                        <td class="feature-col">{{ feature }}</td>
+                        {% for package in packages %}
+                        <td class="text-center">
+                            <!-- 
+                              Paketin özellik listesinde bu özellik varsa
+                              yeşil tik, yoksa gri eksi işareti gösterir.
+                            -->
+                            {% if feature in package.get_features_list() %}
+                                <i class="fas fa-check-circle text-success fs-4"></i>
+                            {% else %}
+                                <i class="fas fa-minus-circle text-muted fs-4"></i>
+                            {% endif %}
+                        </td>
+                        {% endfor %}
+                    </tr>
+                    {% endfor %}
+                    {% else %}
+                    <tr>
+                        <td colspan="{{ packages|length + 1 }}" class="text-center text-muted">Henüz özellik eklenmemiş.</td>
+                    </tr>
+                    {% endif %}
+                    <!-- Fiyat Satırı -->
+                    <tr class="price-row">
+                        <td class="feature-col">Fiyat</td>
+                        {% for package in packages %}
+                        <td class="text-center">
+                             <div class="price-wrap">
+                                <span class="price-monthly fw-bold fs-5">₺{{ package.price_monthly }}/ay</span>
+                                <span class="price-yearly fw-bold fs-5 d-none">₺{{ package.price_yearly }}/yıl</span>
+                            </div>
+                            <a href="#" class="btn btn-sm {% if package.is_popular %}btn-light text-dark{% else %}btn-primary{% endif %} mt-2">Seç</a>
+                        </td>
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+<!-- Sıkça Sorulan Sorular bölümü -->
+<section class="faq-section py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">Sıkça Sorulan Sorular</h2>
+            <p class="lead text-muted">Aklınızdaki soruları yanıtlamak için buradayız.</p>
+        </div>
+        <div class="row justify-content-center">
+            <div class="col-lg-8" data-aos="fade-up" data-aos-delay="100">
+                <div class="accordion" id="faqAccordion">
+                    <div class="accordion-item bg-dark text-white border-secondary" style="transition: background-color 0.4s ease, border-color 0.4s ease;">
+                        <h2 class="accordion-header"><button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseOne">Paketlerdeki hizmetleri değiştirebilir miyim?</button></h2>
+                        <div id="collapseOne" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Evet! Paketlerimiz en yaygın ihtiyaçlara göre tasarlanmış olsa da, her işletmenin kendine özgü hedefleri olduğunun farkındayız. İhtiyaçlarınıza tam olarak uyan, size özel bir hizmet paketi oluşturmak için bizimle iletişime geçebilirsiniz.</div></div>
+                    </div>
+                    <div class="accordion-item bg-dark text-white border-secondary" style="transition: background-color 0.4s ease, border-color 0.4s ease;">
+                        <h2 class="accordion-header"><button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseTwo">Ödemeleri nasıl yapabilirim?</button></h2>
+                        <div id="collapseTwo" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Ödemelerinizi banka havalesi veya kredi kartı ile güvenli bir şekilde yapabilirsiniz. Yıllık paketlerde peşin ödeme ile ek indirimlerden faydalanabilirsiniz.</div></div>
+                    </div>
+                    <div class="accordion-item bg-dark text-white border-secondary" style="transition: background-color 0.4s ease, border-color 0.4s ease;">
+                        <h2 class="accordion-header"><button class="accordion-button bg-dark text-white collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapseThree">Uzun süreli bir sözleşme imzalamak zorunda mıyım?</button></h2>
+                        <div id="collapseThree" class="accordion-collapse collapse" data-bs-parent="#faqAccordion"><div class="accordion-body">Hizmetlerimizde esnekliği ön planda tutuyoruz. Aylık paketlerimizde herhangi bir taahhüt zorunluluğu bulunmamaktadır. Yıllık paketlerimiz ise size fiyat avantajı sağlamak için 12 aylık bir dönemi kapsar.</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}{% endblock %}

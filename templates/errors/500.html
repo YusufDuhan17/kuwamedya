@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - 500 Sunucu Hatası (500.html)
+
+BU ŞABLON, UYGULAMANIN BEKLENMEDİK BİR SUNUCU HATASIYLA KARŞILAŞMASI
+DURUMUNDA KULLANICIYA GÖSTERİLİR.
+
+YENİLİKLER VE "DONANIMLI" ÖZELLİKLER:
+1.  GÜVEN VERİCİ VE PROFESYONEL MESAJ: Sayfa, kullanıcıyı suçlamak veya
+    panikletmek yerine, sorunun teknik olduğunu ve ekibin ilgilendiğini
+    belirten profesyonel ve sakin bir dille iletişim kurar.
+2.  ANİMASYONLU İKON: Dönen dişliler (`fa-spin` animasyonu), "arka planda
+    bir çalışma var" mesajını görsel olarak destekleyerek statik bir
+    hata ekranından daha iyi bir deneyim sunar.
+3.  NET EYLEM BUTONLARI: Kullanıcıya "Sayfayı Yenile" ve "Önceki Sayfaya
+    Dön" gibi o an için en mantıklı olan iki basit seçenek sunulur.
+4.  MARKA KİMLİĞİNE UYGUN TASARIM: Tasarım, projenin genel karanlık ve
+    modern estetiğini koruyarak, hata anında bile marka bütünlüğünü devam
+    ettirir.
+=================================================================== -->
+
+{% block title %}Teknik Bir Aksaklık Yaşandı | Kuwamedya{% endblock %}
+
+{% block content %}
+<div class="error-page-wrapper">
+    <div class="container text-center">
+
+        <div data-aos="zoom-in">
+            <i class="fas fa-cogs fa-7x text-danger mb-4 fa-spin error-icon"></i>
+            <h1 class="display-4 fw-bold">Teknik Bir Aksaklık Yaşandı</h1>
+            <p class="lead text-muted mb-5 col-lg-8 mx-auto">
+                Beklenmedik bir sunucu hatasıyla karşılaştık. Merak etmeyin, bu roketin pilotu biziz! <br>
+                Teknik ekibimiz durumdan anında haberdar edildi ve sorunu çözmek için çalışıyor.
+            </p>
+        </div>
+        
+        <div class="d-grid gap-3 d-sm-flex justify-content-sm-center" data-aos="fade-up" data-aos-delay="200">
+             <!-- ✨ DÜZELTME: `url_for('home')` yerine doğru rota olan `url_for('main.home')` kullanılıyor -->
+            <a href="{{ url_for('main.home') }}" class="btn btn-primary btn-lg px-4 gap-3"><i class="fas fa-sync-alt me-2"></i>Sayfayı Yenile</a>
+            <a href="javascript:history.back()" class="btn btn-outline-secondary btn-lg px-4"><i class="fas fa-arrow-left me-2"></i>Önceki Sayfaya Dön</a>
+        </div>
+
+        <div class="mt-5" data-aos="fade-up" data-aos-delay="300">
+            <p class="small text-muted">Kısa bir süre sonra tekrar denemenizi rica ederiz.</p>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

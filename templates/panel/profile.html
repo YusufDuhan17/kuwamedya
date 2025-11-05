@@ -1,0 +1,368 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Kişisel Performans Paneli (profile.html)
+Sürüm: v6.0 (Akademi Yükseltmesi)
+
+BU ŞABLON, GİRİŞ YAPAN PERSONELİN KENDİ PERFORMANSINI (SATIŞ, PRİM)
+TAKİP ETTİĞİ KİŞİSEL KOKPİTİDİR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE GÜÇLENDİRMELER (v6.0):
+1.  ROL BAZLI GÖRÜNÜM (KRİTİK GÜNCELLEME):
+    - Şablon artık 'user.is_staff' (models.py'den gelir) kontrolü yapar.
+    - Eğer görüntülenen profil bir 'Personel' veya 'Admin'e aitse,
+      "Genel Bakış" (Satış Grafiği) ve "Satış Detayları" sekmeleri
+      gösterilir.
+    - Eğer görüntülenen profil bir 'Kullanıcı' (Öğrenci) rolündeyse,
+      bu iki sekme OTOMATİK OLARAK GİZLENİR ve varsayılan olarak
+      "Akademi İlerlemesi" sekmesi açılır.
+
+2.  AKILLI BAŞLIK (v6.0):
+    - Sayfa başlığı, 'user.is_staff' kontrolüne göre değişir.
+    - Personel için: "Performans Paneli"
+    - Öğrenci için: "Kullanıcı Profili"
+
+3.  CHART.JS GÜÇLENDİRMESİ (KORUNDU):
+    - v5.0'daki 'monthly_sales_data|tojson|safe' kullanımı korunmuştur.
+    - Bu grafik artık sadece 'user.is_staff' True ise render edilir.
+
+4.  GÜVENLİK (KORUNDU):
+    - "Profili Düzenle" ve "Satış Ekle" modalları, 'current_user == user'
+      kontrolü sayesinde sadece kullanıcının kendi profilinde görünmeye
+      devam eder.
+=================================================================== -->
+
+{% block title %}
+    {% if user.is_staff %}
+        {{ user.name }} | Performans Paneli
+    {% else %}
+        {{ user.name }} | Kullanıcı Profili
+    {% endif %}
+{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+<div class="profile-page" data-aos="fade-in">
+
+    <!-- =================================================================== -->
+    <!-- 1. PROFİL BAŞLIĞI VE KPI KARTLARI -->
+    <!-- =================================================================== -->
+    <div class="row mb-4 align-items-center">
+        <div class="col-lg-6">
+            <div class="d-flex align-items-center">
+                <img src="{{ user.avatar(100) }}" alt="{{ user.name }}" class="rounded-circle me-4" width="100" height="100" style="object-fit: cover;">
+                <div>
+                    <h1 class="text-white fw-bold mb-0">{{ user.name }}</h1>
+                    <!-- v6.0: Rolü göster (Personel/Kullanıcı) -->
+                    <p class="text-primary fs-5 mb-0">{{ user.title or user.role }}</p>
+                </div>
+            </div>
+        </div>
+        <!-- 
+          Eylem Butonları (Rol kontrolü)
+          Sadece kullanıcı kendi profilindeyse VE 'Personel/Admin' ise göster.
+        -->
+        {% if current_user == user and current_user.is_staff %}
+        <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#addSaleModal"><i class="fas fa-plus-circle me-2"></i>Yeni Satış Ekle</button>
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="fas fa-edit me-2"></i>Profili Düzenle</button>
+        </div>
+        <!-- Sadece kendi profilindeyse ama 'Kullanıcı' (Öğrenci) ise -->
+        {% elif current_user == user and not current_user.is_staff %}
+         <div class="col-lg-6 text-lg-end mt-3 mt-lg-0">
+             <!-- Sadece profil düzenleme (satış ekleme yok) -->
+            <button type="button" class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editProfileModal"><i class="fas fa-edit me-2"></i>Profili Düzenle</button>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- KPI Kartları -->
+    <div class="row g-4 mb-4">
+        
+        <!-- GÜNCELLEME (v6.0): Bu kartlar artık sadece 'Personel/Admin' ise gösterilir -->
+        {% if user.is_staff %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-success text-white"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Toplam Satış Tutarı</p>
+                        <h4 class="fw-bold mb-0">{{ (total_sales_amount or 0) | currency_format }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4 col-md-6">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-warning text-white"><i class="fas fa-hand-holding-usd"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Kazanılan Toplam Prim</p>
+                        <h4 class="fw-bold mb-0">{{ (total_commission or 0) | currency_format }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        
+        <!-- Akademi kartı herkes için gösterilir -->
+        <!-- GÜNCELLEME (v6.0): Personel ise col-lg-4, değilse col-lg-6 (daha geniş) -->
+        <div class="{% if user.is_staff %}col-lg-4 col-md-12{% else %}col-lg-6 col-md-6{% endif %}">
+            <div class="card bg-dark border-secondary shadow-lg h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-info text-white"><i class="fas fa-graduation-cap"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Tamamlanan Kurs Sayısı</p>
+                        <h4 class="fw-bold mb-0">{{ completed_courses_count or 0 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+         <!-- GÜNCELLEME (v6.0): Sadece 'Kullanıcı' (Öğrenci) ise boşluğu doldur -->
+        {% if not user.is_staff %}
+        <div class="col-lg-6 col-md-6">
+             <div class="card bg-dark border-secondary shadow-lg h-100">
+                <div class="card-body d-flex align-items-center">
+                    <div class="kpi-icon bg-primary text-white"><i class="fas fa-book-open"></i></div>
+                    <div class="ms-3">
+                        <p class="text-muted mb-1">Kayıtlı Kurs Sayısı</p>
+                        <h4 class="fw-bold mb-0">{{ enrollments|length or 0 }}</h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- =================================================================== -->
+    <!-- 2. ANA İÇERİK (SEKMELER) -->
+    <!-- =================================================================== -->
+    <div class="card bg-dark border-secondary shadow-lg">
+        <div class="card-header bg-darker border-secondary">
+            <ul class="nav nav-tabs card-header-tabs">
+                <!-- 
+                  GÜNCELLEME (v6.0): Bu sekmeler artık SADECE 'Personel/Admin' ise gösterilir.
+                -->
+                {% if user.is_staff %}
+                <li class="nav-item"><a class="nav-link active" data-bs-toggle="tab" href="#genel-bakis">Genel Bakış</a></li>
+                <li class="nav-item"><a class="nav-link" data-bs-toggle="tab" href="#satis-detaylari">Satış Detayları</a></li>
+                {% endif %}
+                <!-- 
+                  GÜNCELLEME (v6.0):
+                  - Eğer 'Personel' ise: Normal sekme.
+                  - Eğer 'Kullanıcı' (Öğrenci) ise: 'active' (varsayılan açık) sekme.
+                -->
+                <li class="nav-item">
+                    <a class="nav-link {% if not user.is_staff %}active{% endif %}" data-bs-toggle="tab" href="#akademi-ilerlemesi">Akademi İlerlemesi</a>
+                </li>
+            </ul>
+        </div>
+        <div class="card-body p-4">
+            <div class="tab-content">
+                
+                <!-- GÜNCELLEME (v6.0): Bu sekmeler artık SADECE 'Personel/Admin' ise render edilir -->
+                {% if user.is_staff %}
+                <!-- Genel Bakış Sekmesi (GRAFİK) -->
+                <div class="tab-pane fade show active" id="genel-bakis">
+                    <h5 class="fw-bold mb-3">Aylık Satış Performansı (Son 6 Ay)</h5>
+                    <div style="height: 300px;">
+                        <canvas id="salesChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Satış Detayları Sekmesi (TABLO) -->
+                <div class="tab-pane fade" id="satis-detaylari">
+                    {% if sales and sales.items %}
+                    <div class="table-responsive">
+                        <table class="table table-dark table-hover align-middle">
+                            <thead><tr><th>Ürün/Hizmet</th><th>Tarih</th><th class="text-end">Tutar</th><th class="text-end">Prim</th></tr></thead>
+                            <tbody>
+                                {% for sale in sales.items %}
+                                <tr>
+                                    <td>{{ sale.product_name }}</td>
+                                    <td>{{ sale.date_posted | strftime_tr }}</td>
+                                    <td class="text-end">{{ (sale.amount or 0) | currency_format }}</td>
+                                    <td class="text-end text-success">{{ (sale.commission.amount or 0) | currency_format }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- Sayfalama (Pagination) -->
+                    {% if sales.pages > 1 %}
+                    <nav class="mt-3">
+                        <ul class="pagination justify-content-center mb-0">
+                            <li class="page-item {% if not sales.has_prev %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.profile', username=user.username, page=sales.prev_num) if sales.has_prev else '#' }}">«</a>
+                            </li>
+                            {% for page_num in sales.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
+                                {% if page_num %}
+                                    <li class="page-item {% if sales.page == page_num %}active{% endif %}">
+                                        <a class="page-link" href="{{ url_for('admin.profile', username=user.username, page=page_num) }}">{{ page_num }}</a>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item disabled"><span class="page-link">...</span></li>
+                                {% endif %}
+                            {% endfor %}
+                            <li class="page-item {% if not sales.has_next %}disabled{% endif %}">
+                                <a class="page-link" href="{{ url_for('admin.profile', username=user.username, page=sales.next_num) if sales.has_next else '#' }}">»</a>
+                            </li>
+                        </ul>
+                    </nav>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center p-5"><i class="fas fa-file-invoice-dollar fa-3x text-muted mb-3"></i><p class="mb-0">Henüz kayıtlı bir satış bulunmuyor.</p></div>
+                    {% endif %}
+                </div>
+                {% endif %}
+                <!-- GÜNCELLEME (v6.0) BİTİŞİ -->
+
+                <!-- Akademi İlerlemesi Sekmesi (HERKES GÖREBİLİR) -->
+                <!-- Eğer 'Kullanıcı' (Öğrenci) ise, 'show active' (varsayılan açık) olur -->
+                <div class="tab-pane fade {% if not user.is_staff %}show active{% endif %}" id="akademi-ilerlemesi">
+                    {% if enrollments %}
+                        <div class="row g-3">
+                        {% for enrollment in enrollments %}
+                        <div class="col-12">
+                            <div class="card bg-darker border-secondary">
+                                <div class="card-body">
+                                    <div class="d-flex justify-content-between align-items-center mb-2">
+                                        <div>
+                                            <h6 class="fw-bold mb-1">{{ enrollment.course.title }}</h6>
+                                            <p class="text-muted small mb-0">{{ enrollment.course.get_lesson_count() }} Ders</p>
+                                        </div>
+                                        <a href="{{ url_for('academy.course_detail', course_id=enrollment.course_id) }}" class="btn btn-primary btn-sm">Kursa Devam Et <i class="fas fa-arrow-right ms-1"></i></a>
+                                    </div>
+                                    {% set progress = enrollment.get_progress() %}
+                                    <div class="progress" style="height: 10px;" title="{{ progress }}% tamamlandı">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;" aria-valuenow="{{ progress }}">{{ progress }}%</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                        </div>
+                    {% else %}
+                    <div class="text-center p-5"><i class="fas fa-book-open fa-3x text-muted mb-3"></i><p class="mb-0">Henüz bir kursa kayıtlı değilsiniz.</p><a href="{{ url_for('academy.academy_home') }}" class="btn btn-sm btn-outline-primary mt-2">Akademiyi Keşfet</a></div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- =================================================================== -->
+<!-- 3. MODALLAR -->
+<!-- =================================================================== -->
+<!-- GÜNCELLEME (v6.0): Bu modallar artık SADECE KULLANICI KENDİ PROFİLİNDEYSE gösterilir -->
+{% if current_user == user %}
+<!-- 
+  PROFİLİ DÜZENLE MODALI
+  (Hem Personel hem Kullanıcı kendi profilini düzenleyebilir)
+-->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <form method="POST" action="{{ url_for('admin.profile') }}" enctype="multipart/form-data" novalidate>
+                {{ update_form.hidden_tag() }}
+                <div class="modal-header border-secondary"><h5 class="modal-title">Profili Düzenle</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="row g-3">
+                        <!-- Fotoğraf Önizleme -->
+                        <div class="col-12 text-center">
+                            <img id="imagePreview" src="{{ user.avatar(150) }}" class="rounded-circle mb-3" width="150" height="150" alt="Profil Fotoğrafı" style="object-fit: cover;">
+                            <div class="form-group">
+                                {{ update_form.picture(class="form-control form-control-sm bg-darker border-secondary text-white", id="imageUpload") }}
+                                {% if update_form.picture.errors %}
+                                    <div class="invalid-feedback d-block">
+                                        {% for error in update_form.picture.errors %}<span>{{ error }}</span>{% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Temel Bilgiler -->
+                        <div class="col-md-6">{{ update_form.name.label(class="form-label") }}{{ update_form.name(class="form-control bg-darker border-secondary text-white") }}</div>
+                        <div class="col-md-6">{{ update_form.username.label(class="form-label") }}{{ update_form.username(class="form-control bg-darker border-secondary text-white") }}</div>
+                        <div class="col-12">{{ update_form.email.label(class="form-label") }}{{ update_form.email(class="form-control bg-darker border-secondary text-white") }}</div>
+                        
+                        <!-- Profil Detayları -->
+                        <div class="col-12">{{ update_form.title.label(class="form-label") }}{{ update_form.title(class="form-control bg-darker border-secondary text-white") }}</div>
+                        <div class="col-12">{{ update_form.quote.label(class="form-label") }}{{ update_form.quote(class="form-control bg-darker border-secondary text-white", rows="2") }}</div>
+                        <div class="col-12">{{ update_form.bio.label(class="form-label") }}{{ update_form.bio(class="form-control bg-darker border-secondary text-white", rows="4") }}</div>
+
+                        <!-- Sosyal Medya -->
+                        <div class="col-md-6">{{ update_form.social_linkedin.label(class="form-label") }}{{ update_form.social_linkedin(class="form-control bg-darker border-secondary text-white", placeholder="https://linkedin.com/in/...") }}</div>
+                        <div class="col-md-6">{{ update_form.social_twitter.label(class="form-label") }}{{ update_form.social_twitter(class="form-control bg-darker border-secondary text-white", placeholder="https://twitter.com/...") }}</div>
+                        <div class="col-12">{{ update_form.social_github.label(class="form-label") }}{{ update_form.social_github(class="form-control bg-darker border-secondary text-white", placeholder="https://github.com/...") }}</div>
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    {{ update_form.submit(class="btn btn-primary", render_kw={'name': 'submit_profile'}) }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- 
+  YENİ SATIŞ EKLE MODALI
+  GÜNCELLEME (v6.0): Artık SADECE 'current_user.is_staff' ise render edilir.
+-->
+{% if current_user.is_staff %}
+<div class="modal fade" id="addSaleModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <form method="POST" action="{{ url_for('admin.new_sale') }}" novalidate>
+                {{ sale_form.hidden_tag() }}
+                <div class="modal-header border-secondary"><h5 class="modal-title">Yeni Satış Ekle</h5><button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button></div>
+                <div class="modal-body">
+                    <div class="mb-3">{{ sale_form.product_name.label(class="form-label") }}{{ sale_form.product_name(class="form-control bg-darker border-secondary text-white") }}</div>
+                    <div class="mb-3">{{ sale_form.amount.label(class="form-label") }}{{ sale_form.amount(class="form-control bg-darker border-secondary text-white") }}</div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    {{ sale_form.submit(class="btn btn-success") }}
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endif %}
+{% endblock %}
+
+
+<!-- =================================================================== -->
+<!-- SAYFAYA ÖZEL JAVASCRIPT -->
+<!-- =================================================================== -->
+{% block scripts %}
+<!-- Chart.js Kütüphanesi -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    
+    // --- 1. SATIŞ GRAFİĞİ OLUŞTURMA ---
+    const chartCanvas = document.getElementById('salesChart');
+    
+    // GÜNCELLEME (v6.0): Grafik artık SADECE 'user.is_staff' ise ve
+    // 'chartCanvas' elementi varsa çalışır ('Kullanıcı' profilinde bu element yoktur).
+    if (chartCanvas) {
+        // 'main.js' dosyasındaki 'KuwamedyaApp.Panel.initSalesChart' fonksiyonu
+        // bu 'data-sales' attribute'unu okuyacaktır.
+        chartCanvas.dataset.sales = '{{ monthly_sales_data|tojson|safe }}';
+    }
+
+    // --- 2. FOTOĞRAF YÜKLEME ÖNİZLEMESİ (main.js'den yönetilir) ---
+    // 'main.js' dosyasındaki 'KuwamedyaApp.Panel.initImagePreview' fonksiyonu
+    // bu sayfadaki '#imageUpload' ve '#imagePreview' elementlerini
+    // otomatik olarak bulur ve çalıştırır.
+    
+    // (v5.0'daki lokal script'i sildik çünkü artık main.js'de merkezi olarak yönetiliyor)
+});
+</script>
+{% endblock %}

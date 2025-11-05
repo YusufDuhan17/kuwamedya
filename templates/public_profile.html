@@ -1,0 +1,94 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Halka Açık Personel Profili (public_profile.html)
+Sürüm: v7.0 (Template Syntax Error Fix - Complete Rewrite)
+=================================================================== -->
+
+{% block title %}{{ user.name }} | Ekibimiz{% endblock %}
+{% block description %}Kuwamedya ekibinden {{ user.name }} ({{ user.title }}) hakkında daha fazla bilgi edinin.{% endblock %}
+
+{% block content %}
+
+<!-- Sayfa başlığı -->
+<section class="page-header py-5 text-center">
+    <div class="container" data-aos="fade-down">
+        <img src="{{ user.avatar(200) }}" class="rounded-circle shadow-lg mb-4" width="200" height="200" alt="{{ user.name }}" style="object-fit: cover; border: 5px solid var(--primary);">
+        <h1 class="display-4 fw-bold mb-2">{{ user.name }}</h1>
+        {% if user.title %}
+        <p class="lead fw-bold fs-3" style="color: var(--primary);">{{ user.title }}</p>
+        {% endif %}
+    </div>
+</section>
+
+<!-- Profil Detayları Bölümü -->
+<section class="public-profile-section py-5">
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-10">
+                <div class="card bg-dark border-secondary shadow-lg">
+                    <div class="card-body p-4 p-md-5">
+                        <div class="row g-5">
+                            <!-- Sol Sütun: Sosyal Medya ve Motto -->
+                            <div class="col-lg-4" data-aos="fade-right">
+                                <div class="sticky-top" style="top: 100px;">
+                                    {% if user.social_linkedin or user.social_twitter or user.social_github %}
+                                    <h5 class="fw-bold text-white mb-3">Sosyal Medyada Takip Et</h5>
+                                    <div class="list-group">
+                                        {% if user.social_linkedin %}
+                                        <a href="{{ user.social_linkedin }}" target="_blank" class="list-group-item list-group-item-action bg-dark text-white d-flex align-items-center">
+                                            <i class="fab fa-linkedin-in fa-fw me-3 text-primary"></i> LinkedIn
+                                        </a>
+                                        {% endif %}
+                                        {% if user.social_twitter %}
+                                        <a href="{{ user.social_twitter }}" target="_blank" class="list-group-item list-group-item-action bg-dark text-white d-flex align-items-center">
+                                            <i class="fab fa-twitter fa-fw me-3 text-primary"></i> Twitter
+                                        </a>
+                                        {% endif %}
+                                        {% if user.social_github %}
+                                        <a href="{{ user.social_github }}" target="_blank" class="list-group-item list-group-item-action bg-dark text-white d-flex align-items-center">
+                                            <i class="fab fa-github fa-fw me-3 text-primary"></i> GitHub
+                                        </a>
+                                        {% endif %}
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if user.quote %}
+                                    <h5 class="fw-bold text-white mt-5 mb-3">Motto</h5>
+                                    <blockquote class="blockquote text-muted border-start border-primary border-3 ps-3">
+                                        <p class="fst-italic">"{{ user.quote }}"</p>
+                                    </blockquote>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Sağ Sütun: Hakkında (Bio) -->
+                            <div class="col-lg-8" data-aos="fade-left" data-aos-delay="100">
+                                <h2 class="fw-bold text-white mb-4">Hakkında</h2>
+                                <div class="prose-styles">
+                                    {% if user.bio %}
+                                    <p>{{ user.bio | replace("\n", "<br>") | safe }}</p>
+                                    {% else %}
+                                    <p class="text-muted">Bu ekip üyesi henüz bir biyografi eklememiş.</p>
+                                    {% endif %}
+                                </div>
+                                
+                                <h3 class="fw-bold text-white mt-5 mb-4">Yer Aldığı Projeler</h3>
+                                <div class="alert alert-info bg-info bg-opacity-10 border-info border-opacity-50 text-info-emphasis">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Bu özellik yakında aktif olacaktır.
+                                </div>
+
+                                <a href="{{ url_for('main.personnel_list') }}" class="btn btn-outline-primary mt-4">
+                                    <i class="fas fa-arrow-left me-2"></i>Tüm Ekibe Geri Dön
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+{% endblock %}

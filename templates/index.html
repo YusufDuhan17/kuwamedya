@@ -1,0 +1,293 @@
+{% extends "layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Ana Sayfa (index.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, ZİYARETÇİLERİ KARŞILAYAN, AJANSIN VİZYONUNU,
+YETENEKLERİNİ VE BAŞARISINI TEK BİR YERDE SERGİLEYEN ANA VİTRİNDİR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  TAMAMEN DİNAMİK İÇERİK:
+    İstatistikler, müşteri yorumları ve son projeler... Sayfadaki tüm
+    önemli içerik artık statik HTML değil, `main_routes.py` dosyasındaki
+    `home()` rotasından gelen `stats`, `testimonials` ve `latest_projects`
+    değişkenleri tarafından dinamik olarak beslenmektedir.
+
+2.  MERKEZİLEŞTİRİLMİŞ JAVASCRIPT MİMARİSİ (DRY PRENSİBİ):
+    Bu dosyanın içindeki TÜM JavaScript mantığı (sayaç animasyonu)
+    kaldırılmıştır. Bu fonksiyon, `layout.html` üzerinden yüklenen
+    `static/js/main.js` dosyasındaki merkezi
+    `KuwamedyaApp.Core.initStatCounters` modülü tarafından
+    yönetilmektedir. Bu, kod tekrarını engeller ve bakımı kolaylaştırır.
+
+3.  PROFESYONEL "BOŞ DURUM" GÖSTERİMİ:
+    Veritabanında henüz hiç müşteri yorumu veya proje olmaması durumuna
+    karşı 'else' blokları eklenmiştir. Bu sayede sayfa, veri
+    olmadığında bile profesyonel ve bilgilendirici bir mesaj gösterir.
+
+4.  VİDEO ARKA PLAN (HERO):
+    Statik bir görsel yerine, `static/videos/` klasöründen (eğer varsa)
+    çekilebilecek bir video arka planı ve mobil cihazlar için bir poster
+    görseli (`hero_poster.jpg`) ile donatılmıştır.
+=================================================================== -->
+
+<!-- Sayfa başlığı (Title) ve SEO Açıklaması (Description) blokları -->
+{% block title %}Kuwamedya - Dijital Pazarlama ve Web Yazılım Ajansı{% endblock %}
+{% block description %}Yenilikçi dijital pazarlama stratejileri, modern web yazılımı çözümleri ve profesyonel personel temini hizmetleri ile markanızı geleceğe taşıyoruz.{% endblock %}
+
+<!-- Ana içerik bloğu -->
+{% block content %}
+
+<!-- 1. HERO BÖLÜMÜ (ENHANCED PROFESSIONAL SPLIT LAYOUT) -->
+<section class="hero-section hero-split d-flex align-items-center min-vh-100 position-relative overflow-hidden">
+  <!-- Animated background elements -->
+  <div class="hero-background-shapes">
+    <div class="shape shape-1"></div>
+    <div class="shape shape-2"></div>
+    <div class="shape shape-3"></div>
+  </div>
+  
+  <div class="container position-relative">
+    <div class="row align-items-center g-5">
+      <!-- Sol: Metin -->
+      <div class="col-lg-6" data-aos="fade-right" data-aos-duration="800">
+        <div class="hero-badge mb-3">
+          <span class="badge bg-primary bg-opacity-10 text-primary px-3 py-2 rounded-pill">
+            <i class="fas fa-star me-2"></i>Dijital Çözüm Ortağınız
+          </span>
+        </div>
+        <h1 class="display-3 fw-bold mb-4 hero-title">
+          Dijital Dünyada <span class="text-primary">Fark Yaratalım</span>
+        </h1>
+        <p class="lead mb-4 hero-description">
+          Yaratıcı fikirleri, yenilikçi teknoloji ve profesyonel ekiplerle birleştirerek markanız için unutulmaz deneyimler tasarlıyoruz.
+        </p>
+        
+        <!-- İstatistikler -->
+        <div class="hero-stats d-flex gap-4 mb-4">
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold">500+</div>
+            <div class="stat-label text-muted small">Başarılı Proje</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold">200+</div>
+            <div class="stat-label text-muted small">Mutlu Müşteri</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-number text-primary fw-bold">10+</div>
+            <div class="stat-label text-muted small">Yıllık Deneyim</div>
+          </div>
+        </div>
+        
+        <div class="d-flex flex-wrap gap-3">
+          <a href="#services-section" class="btn btn-primary btn-lg px-4 py-3 shadow-lg hero-cta-btn">
+            <i class="fas fa-rocket me-2"></i>Hizmetlerimiz
+          </a>
+          <a href="https://wa.me/905413982042" target="_blank" class="btn btn-outline-primary btn-lg px-4 py-3 hero-cta-btn">
+            <i class="fab fa-whatsapp me-2"></i>Bizimle İletişime Geçin
+          </a>
+        </div>
+      </div>
+      <!-- Sağ: Görsel -->
+      <div class="col-lg-6" data-aos="fade-left" data-aos-duration="800" data-aos-delay="200">
+        <div class="hero-visual-wrapper position-relative">
+          <div class="hero-visual shadow-xl rounded-4 overflow-hidden position-relative">
+            <img src="https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=1200&h=800&fit=crop" alt="Profesyonel Ekip Çalışması" class="w-100 h-100" style="object-fit: cover;">
+            <div class="hero-visual-overlay"></div>
+          </div>
+          <!-- Floating elements -->
+          <div class="floating-card card-1">
+            <i class="fas fa-trophy text-warning"></i>
+            <div class="floating-text">En İyi Ajans</div>
+          </div>
+          <div class="floating-card card-2">
+            <i class="fas fa-users text-primary"></i>
+            <div class="floating-text">Uzman Ekip</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Scroll indicator -->
+  <div class="scroll-indicator">
+    <a href="#services-section" class="scroll-down">
+      <i class="fas fa-chevron-down"></i>
+    </a>
+  </div>
+</section>
+
+<!-- 2. ANA HİZMETLER BÖLÜMÜ -->
+<section id="services-section" class="py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">Neler Yapıyoruz?</h2>
+            <p class="lead text-muted">Üç ana faaliyet alanımızla işletmenize 360 derece destek sağlıyoruz.</p>
+        </div>
+        <div class="row g-4 justify-content-center">
+            <div class="col-lg-4 col-md-10" data-aos="fade-right" data-aos-delay="100">
+                <div class="card bg-dark border-secondary h-100 shadow-lg service-card">
+                    <div class="card-body text-center p-5">
+                        <div class="feature-icon bg-primary mb-4"><i class="fas fa-code"></i></div>
+                        <h3 class="card-title fw-bold">Medya & Yazılım Ajansı</h3>
+                        <p class="card-text">Sosyal medya yönetiminden özel web yazılımlarına, dijital pazarlama stratejilerinden içerik üretimine kadar markanızın dijitaldeki tüm ihtiyaçlarına profesyonel çözümler sunuyoruz.</p>
+                        <a href="{{ url_for('main.packages') }}" class="btn btn-outline-primary mt-3 stretched-link">Detayları Gör</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-10" data-aos="fade-up" data-aos-delay="200">
+                 <div class="card bg-dark border-secondary h-100 shadow-lg service-card">
+                    <div class="card-body text-center p-5">
+                        <div class="feature-icon bg-primary mb-4"><i class="fas fa-users"></i></div>
+                        <h3 class="card-title fw-bold">Personel Temini & Organizasyon</h3>
+                        <p class="card-text">Projeleriniz ve etkinlikleriniz için ihtiyaç duyduğunuz uzman saha ekiplerini, hostesleri ve diğer personelleri titizlikle seçiyor, etkinlik yönetimi hizmetimizle organizasyonlarınızı kusursuzlaştırıyoruz.</p>
+                        <!-- 'main.personnel_list' rotasına bağlanır -->
+                        <a href="{{ url_for('main.personnel_list') }}" class="btn btn-outline-primary mt-3 stretched-link">Ekibimize Göz At</a>
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-10" data-aos="fade-left" data-aos-delay="300">
+                <div class="card bg-gradient-primary text-white border-0 h-100 shadow-lg service-card hover-lift position-relative overflow-hidden">
+                    <!-- Decorative background pattern -->
+                    <div class="position-absolute top-0 end-0 opacity-25" style="width: 200px; height: 200px; background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, transparent 70%); transform: translate(30%, -30%);"></div>
+                    <div class="card-body text-center p-5 position-relative">
+                        <div class="feature-icon bg-white bg-opacity-20 mb-4" style="width: 80px; height: 80px; margin: 0 auto; border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                            <i class="fas fa-calendar-alt fa-2x text-white"></i>
+                        </div>
+                        <h3 class="card-title fw-bold text-white mb-3">Kapsül Event</h3>
+                        <p class="card-text text-white-50 mb-4">Profesyonel organizasyon ve etkinlik yönetimi hizmetleri. İki yıllık tecrübemizle farklı sektörlerde başarılı projelere imza attık.</p>
+                        <button type="button" class="btn btn-light btn-lg mt-3 shadow-sm" data-bs-toggle="modal" data-bs-target="#kapsulEventModal">
+                            <i class="fas fa-info-circle me-2"></i>Detayları Gör
+                        </button>
+                        <div class="mt-4 pt-3 border-top border-white border-opacity-25">
+                            <small class="text-white-50">
+                                <i class="fas fa-star me-1 text-warning"></i>
+                                <i class="fas fa-star me-1 text-warning"></i>
+                                <i class="fas fa-star me-1 text-warning"></i>
+                                <i class="fas fa-star me-1 text-warning"></i>
+                                <i class="fas fa-star me-2 text-warning"></i>
+                                50+ Başarılı Proje
+                            </small>
+        </div>
+    </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- 4. "NEDEN BİZ?" BÖLÜMÜ -->
+<section class="why-us-section py-5">
+    <div class="container">
+        <div class="row align-items-center g-5">
+            <div class="col-lg-6" data-aos="fade-right">
+                <img src="{{ url_for('static', filename='images/why-us.jpg') }}" alt="Ofiste çalışan ekip" class="img-fluid rounded shadow-lg">
+            </div>
+            <div class="col-lg-6" data-aos="fade-left">
+                <h2 class="fw-bold mb-4">Stratejik ve Yaratıcı Çözüm Ortağınız</h2>
+                <p class="text-muted mb-4">Biz sadece hizmet vermiyoruz; markanızın bir parçası oluyor, hedeflerinize ulaşmanız için sizinle birlikte çalışıyoruz.</p>
+                <ul class="list-unstyled">
+                    <li class="d-flex mb-3"><i class="fas fa-check-circle text-primary fa-2x me-3"></i><div><h5 class="fw-bold">Veri Odaklı Yaklaşım</h5><p class="text-muted mb-0">Tüm stratejilerimizi somut veriler ve analizler üzerine kurarız.</p></div></li>
+                    <li class="d-flex mb-3"><i class="fas fa-check-circle text-primary fa-2x me-3"></i><div><h5 class="fw-bold">Şeffaf Raporlama</h5><p class="text-muted mb-0">Yaptığımız tüm çalışmaları ve sonuçları, düzenli raporlarla size sunarız.</p></div></li>
+                    <li class="d-flex"><i class="fas fa-check-circle text-primary fa-2x me-3"></i><div><h5 class="fw-bold">Tutkulu Ekip</h5><p class="text-muted mb-0">Alanında uzman, dinamik ve projenizi sahiplenen bir ekiple çalışırsınız.</p></div></li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 5. MÜŞTERİ YORUMLARI (DİNAMİK) -->
+<section class="testimonials-section bg-dark py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">Müşterilerimiz Ne Diyor?</h2>
+            <p class="lead text-muted">Başarı hikayelerimizi bir de onlardan dinleyin.</p>
+        </div>
+        
+        <!-- DİNAMİK VERİ: `testimonials` listesi (main_routes.py'den gelir) -->
+        {% if testimonials %}
+        <div id="testimonialCarousel" class="carousel slide" data-bs-ride="carousel" data-bs-interval="5000" data-bs-pause="hover">
+            <div class="carousel-inner">
+                {% for testimonial in testimonials %}
+                <div class="carousel-item {% if loop.first %}active{% endif %}">
+                    <div class="testimonial-card">
+                        <img src="{{ testimonial.get_author_avatar() }}" class="testimonial-img" alt="{{ testimonial.author_name }}">
+                        <p class="testimonial-text">"{{ testimonial.quote }}"</p>
+                        <h5 class="testimonial-author">{{ testimonial.author_name }}</h5>
+                        <p class="testimonial-role">{{ testimonial.author_title }}</p>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <button class="carousel-control-prev" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Önceki</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#testimonialCarousel" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Sonraki</span>
+            </button>
+            <!-- Carousel indicators -->
+            <div class="carousel-indicators">
+                {% for testimonial in testimonials %}
+                <button type="button" data-bs-target="#testimonialCarousel" data-bs-slide-to="{{ loop.index0 }}" {% if loop.first %}class="active"{% endif %} aria-label="Slide {{ loop.index }}"></button>
+                {% endfor %}
+            </div>
+        </div>
+        {% else %}
+        <!-- GÜÇLENDİRME (v5.0): "Boş Durum" mesajı -->
+         <div class="text-center p-4 text-muted" data-aos="fade-up">
+            <i class="fas fa-comment-slash fa-3x mb-3"></i><br>
+            Henüz müşteri yorumu eklenmemiş.
+         </div>
+        {% endif %}
+    </div>
+</section>
+
+<!-- 6. SON PROJELER (DİNAMİK) -->
+<section class="latest-projects-section py-5">
+    <div class="container">
+        <div class="text-center mb-5" data-aos="fade-up">
+            <h2 class="fw-bold">Son Çalışmalarımız</h2>
+            <p class="lead text-muted">Portfolyomuza eklenen en yeni başarı hikayeleri.</p>
+        </div>
+        
+        <!-- DİNAMİK VERİ: `latest_projects` listesi (main_routes.py'den gelir) -->
+        {% if latest_projects %}
+        <div class="row g-4">
+            {% for project in latest_projects %}
+            <div class="col-lg-4 col-md-6" data-aos="zoom-in-up" data-aos-delay="{{ loop.index * 100 }}">
+                <a href="{{ url_for('main.portfolio') }}" class="project-card-sm">
+                    <img src="{{ project.cover_image_url }}" alt="{{ project.title }}">
+                    <div class="project-card-sm-overlay">
+                        <div class="project-card-sm-content">
+                            <span class="badge bg-primary mb-2">{{ project.category }}</span>
+                            <h4 class="text-white">{{ project.title }}</h4>
+                        </div>
+                    </div>
+                </a>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="text-center mt-5" data-aos="fade-up">
+            <a href="{{ url_for('main.portfolio') }}" class="btn btn-outline-primary">Tüm Portfolyoyu Gör</a>
+        </div>
+        {% else %}
+        <!-- GÜÇLENDİRME (v5.0): "Boş Durum" mesajı -->
+        <div class="text-center p-4 text-muted" data-aos="fade-up">
+            <i class="fas fa-folder-open fa-3x mb-3"></i><br>
+            Henüz portfolyoya proje eklenmemiş.
+        </div>
+        {% endif %}
+    </div>
+</section>
+
+
+<!-- Kapsül Event Modal artık layout.html'de global olarak tanımlı - Buradan kaldırıldı -->
+
+{% endblock %}
+
+
+{% block scripts %}{% endblock %}

@@ -1,0 +1,93 @@
+<!-- ===================================================================
+Kuwamedya - Flash Mesaj Bildirimleri (flash_messages.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, FLASK'İN `flash()` FONKSİYONU İLE GÖNDERİLEN TÜM MESAJLARI
+(BAŞARI, HATA, UYARI, BİLGİ) KULLANICIYA GÖSTERMEK İÇİN KULLANILIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MODERN "TOAST" TASARIMI:
+    Mesajlar artık sayfanın içinde statik, çirkin bir kutu olarak
+    durmak yerine, ekranın sağ üst köşesinde beliren, modern "toast"
+    bildirimleri olarak gösterilir. Bu, 'style.css' içindeki
+    '.toast-container' sınıfı ile yönetilir.
+
+2.  TAM İKON ENTEGRASYONU (layout.html BAĞIMLILIĞI):
+    Her mesaj türü (`success`, `danger`, `warning`, `info`),
+    `layout.html` dosyasının <body> etiketinin hemen altına gömdüğümüz
+    Bootstrap SVG Sprite Sheet'i kullanarak kendine özgü bir ikonla
+    (onay işareti, ünlem vb.) gösterilir. Bu, mesajın anlamını anında güçlendirir.
+
+3.  KATEGORİYE DUYARLI RENKLER:
+    Bildirimlerin arka plan rengi (`bg-success`, `bg-danger` vb.),
+    Python tarafında `flash("...", "success")` şeklinde belirtilen
+    kategoriye göre otomatik olarak değişir.
+
+4.  MERKEZİ YÖNETİM:
+    Bu tek dosya, projenin tamamındaki tüm bildirimlerin tutarlı
+    (aynı görünüm, aynı davranış) olmasını sağlar.
+=================================================================== -->
+
+<!-- 
+  Flask'in 'get_flashed_messages' fonksiyonunu 'with_categories=true'
+  parametresiyle çağırarak mesajları ve kategorilerini (örn: 'success') alırız.
+-->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    <!-- Sadece gösterilecek bir mesaj varsa bu HTML bloğunu render et -->
+    {% if messages %}
+        <!-- 
+          Tüm bildirimleri (toast'ları) tutan ana konteyner.
+          Bootstrap sınıfları ile ekranın SAĞ ÜST köşesine sabitlenir.
+          'style.css' dosyamız bu sınıfları destekler.
+        -->
+        <div class="toast-container position-fixed top-0 end-0 p-3" style="z-index: 1100;">
+            
+            <!-- Gelen her bir mesaj için bu döngü çalışır -->
+            {% for category, message in messages %}
+                
+                <!-- 
+                  Kategoriye göre doğru Bootstrap rengini ve SVG ikon adını
+                  ayarlayan JINJA2 mantığı.
+                -->
+                {% set alert_class = 'info' %}
+                {% set icon_id = 'info-circle-fill' %}
+
+                {% if category == 'success' %}
+                    {% set alert_class = 'success' %}
+                    {% set icon_id = 'check-circle-fill' %}
+                {% elif category == 'danger' %}
+                    {% set alert_class = 'danger' %}
+                    {% set icon_id = 'exclamation-triangle-fill' %}
+                {% elif category == 'warning' %}
+                    {% set alert_class = 'warning' %}
+                    {% set icon_id = 'exclamation-triangle-fill' %}
+                {% endif %}
+
+                <!-- 
+                  Tek bir bildirim (toast) kartı.
+                  'show' sınıfı, JavaScript'e gerek kalmadan görünür olmasını sağlar.
+                  'bg-{{ alert_class }}' ile dinamik olarak renklenir.
+                -->
+                <div class="toast show align-items-center text-white bg-{{ alert_class }} border-0" role="alert" aria-live="assertive" aria-atomic="true" data-aos="fade-left">
+                    <div class="d-flex">
+                        <div class="toast-body">
+                            <div class="d-flex align-items-center">
+                                <!-- 
+                                  KRİTİK GÜÇLENDİRME:
+                                  Bu SVG, 'layout.html' içine gömdüğümüz SVG sprite'dan
+                                  '{{ icon_id }}' (örn: #check-circle-fill) ID'li ikonu çeker.
+                                -->
+                                <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="{{ category|capitalize }}:"><use xlink:href="#{{ icon_id }}"/></svg>
+                                
+                                <!-- Flask'ten gelen asıl mesaj metni -->
+                                <span>{{ message }}</span>
+                            </div>
+                        </div>
+                        <!-- Kapatma butonu -->
+                        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Kapat"></button>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endwith %}

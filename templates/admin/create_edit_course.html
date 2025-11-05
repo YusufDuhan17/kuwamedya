@@ -1,0 +1,78 @@
+{% extends "panel/_panel_layout.html" %}
+
+{% block title %}Kurs {{ 'Düzenle' if course else 'Oluştur' }} | Kuwamedya{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Kurs {{ 'Düzenle' if course else 'Oluştur' }}</h1>
+    <a href="{{ url_for('academy.manage_courses') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Geri Dön</a>
+</div>
+
+<div class="card bg-dark border-secondary shadow-lg" data-aos="fade-up">
+    <div class="card-body p-4 p-lg-5">
+        <form method="POST" action="" enctype="multipart/form-data">
+            {{ form.hidden_tag() }}
+
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form.title.label(class_='form-label') }}
+                        {{ form.title(class_='form-control bg-darker border-secondary text-white') }}
+                        {% if form.title.errors %}
+                            <div class="text-danger small">{% for error in form.title.errors %}{{ error }}{% endfor %}</div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.category.label(class_='form-label') }}
+                        {{ form.category(class_='form-select bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.difficulty.label(class_='form-label') }}
+                        {{ form.difficulty(class_='form-select bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.duration_hours.label(class_='form-label') }}
+                        {{ form.duration_hours(class_='form-control bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.instructor_name.label(class_='form-label') }}
+                        {{ form.instructor_name(class_='form-control bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.cover_image.label(class_='form-label') }}
+                        {{ form.cover_image(class_='form-control bg-darker border-secondary text-white') }}
+                        {% if course and course.cover_image %}
+                            <small class="text-muted">Mevcut: {{ course.cover_image }}</small>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.description.label(class_='form-label') }}
+                        {{ form.description(class_='form-control bg-darker border-secondary text-white', rows=6) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                {{ form.submit(class_='btn btn-primary') }}
+                <a href="{{ url_for('academy.manage_courses') }}" class="btn btn-outline-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

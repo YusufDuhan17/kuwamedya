@@ -1,0 +1,84 @@
+{% extends "panel/_panel_layout.html" %}
+
+{% block title %}Proje {{ 'Düzenle' if project else 'Oluştur' }} | Kuwamedya{% endblock %}
+
+{% block panel_content %}
+<div class="d-flex justify-content-between align-items-center mb-4" data-aos="fade-down">
+    <h1 class="text-white fw-bold">Proje {{ 'Düzenle' if project else 'Oluştur' }}</h1>
+    <a href="{{ url_for('admin.project_list') }}" class="btn btn-outline-secondary"><i class="fas fa-arrow-left me-2"></i>Geri Dön</a>
+</div>
+
+<div class="card bg-dark border-secondary shadow-lg" data-aos="fade-up">
+    <div class="card-body p-4 p-lg-5">
+        <form method="POST" action="">
+            {{ form.hidden_tag() }}
+
+            <div class="row g-4">
+                <div class="col-md-8">
+                    <div class="mb-3">
+                        {{ form.title.label(class_='form-label') }}
+                        {{ form.title(class_='form-control bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="mb-3">
+                        {{ form.category.label(class_='form-label') }}
+                        {{ form.category(class_='form-select bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.client.label(class_='form-label') }}
+                        {{ form.client(class_='form-control bg-darker border-secondary text-white') }}
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.project_date.label(class_='form-label') }}
+                        {{ form.project_date(class_='form-control bg-darker border-secondary text-white', type='date') }}
+                    </div>
+                </div>
+
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.cover_image_url.label(class_='form-label') }}
+                        {{ form.cover_image_url(class_='form-control bg-darker border-secondary text-white') }}
+                        <small class="text-muted">Görsel URL'si (örn: https://images.unsplash.com/...)</small>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="mb-3">
+                        {{ form.live_url.label(class_='form-label') }}
+                        {{ form.live_url(class_='form-control bg-darker border-secondary text-white') }}
+                        <small class="text-muted">Canlı site URL'si (opsiyonel)</small>
+                    </div>
+                </div>
+
+                {% if form.technologies is defined %}
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.technologies.label(class_='form-label') }}
+                        {{ form.technologies(class_='form-select bg-darker border-secondary text-white', multiple=True, size=5) }}
+                        <small class="text-muted">Ctrl (Cmd) tuşu ile birden fazla seçim yapabilirsiniz</small>
+                    </div>
+                </div>
+                {% endif %}
+
+                <div class="col-12">
+                    <div class="mb-3">
+                        {{ form.description.label(class_='form-label') }}
+                        {{ form.description(class_='form-control bg-darker border-secondary text-white', rows=6) }}
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-4 d-flex gap-2">
+                {{ form.submit(class_='btn btn-primary') }}
+                <a href="{{ url_for('admin.project_list') }}" class="btn btn-outline-secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+

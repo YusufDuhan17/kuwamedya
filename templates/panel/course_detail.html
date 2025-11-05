@@ -1,0 +1,250 @@
+{% extends "panel/_panel_layout.html" %}
+
+<!-- ===================================================================
+Kuwamedya - Kurs Detay Sayfası (course_detail.html)
+Sürüm: v5.0 (Kusursuz & Ultra Donanımlı)
+
+BU ŞABLON, BİR KURSUN TÜM DETAYLARINI, MÜFREDATINI VE KULLANICININ
+O KURSTAKİ DURUMUNU GÖSTEREN ANA AÇILIŞ SAYFASIDIR.
+
+'templates/panel/_panel_layout.html' DOSYASINDAN MİRAS ALIR.
+
+YENİLİKLER VE "KUSURSUZ" ÖZELLİKLER:
+1.  MİMARİ GÜNCELLEMESİ (v5.0):
+    Bu şablon artık 'templates/panel/' klasöründe yer alarak ve
+    'panel/_panel_layout.html' dosyasından miras alarak, personel
+    panelinin bir parçası olduğunu netleştirir.
+
+2.  TAM MODEL ENTEGRASYONU (DRY PRENSİBİ):
+    Şablon, 'models.py' içindeki 'get_progress', 'get_lesson_count' ve
+    'is_lesson_completed' gibi yardımcı metotlarla %100 entegre çalışır.
+    Bu, Jinja2 şablonu içindeki karmaşık mantığı (örn: completed_lessons.split(','))
+    tamamen ortadan kaldırır ve kodu inanılmaz derecede temizler.
+
+3.  AKILLI "DEVAM ET" BUTONU (v5.0 GÜÇLENDİRMESİ):
+    Sağdaki "Kursa Devam Et" butonu, artık Jinja2 'namespace' kullanarak
+    personelin o kursta tamamlamadığı İLK DERSİ (doğru sırayla)
+    otomatik olarak bulur ve kullanıcıyı doğrudan o derse yönlendirir.
+
+4.  AKILLI İKONLAR (v5.0 GÜÇLENDİRMESİ):
+    Müfredat listesi, dersin tipine (Video, Metin, Quiz) ve
+    'is_lesson_completed' metodundan gelen duruma göre (onay ikonu,
+    video ikonu, sınav ikonu vb.) dinamik ikonlar gösterir.
+=================================================================== -->
+
+{% block title %}{{ course.title }} | Kuwamedya Akademisi{% endblock %}
+
+<!-- Panel iskeletinin 'panel_content' bloğunu doldurur -->
+{% block panel_content %}
+<div class="course-detail-page" data-aos="fade-in">
+
+    <!-- =================================================================== -->
+    <!-- 1. KURS BAŞLIĞI VE TANITIM BÖLÜMÜ -->
+    <!-- =================================================================== -->
+    <!-- 
+      Kurs kapak fotoğrafı, 'cover_image' alanından dinamik olarak çekilir.
+      Eğer 'cover_image' alanı boşsa (None), 'course_default.png'
+      adlı varsayılan bir görseli kullanır.
+    -->
+    {% set cover = course.cover_image or 'course_default.png' %}
+    {% if cover and cover.startswith('http') %}
+    <div class="course-header" style="background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.95)), url('{{ cover }}');">
+    {% else %}
+    <div class="course-header" style="background-image: linear-gradient(rgba(18, 18, 18, 0.85), rgba(18, 18, 18, 0.95)), url('{{ url_for('static', filename='images/courses/' + cover) }}');">
+    {% endif %}
+        <div class="container-fluid">
+            <!-- 'academy.academy_home' rotasına (ana akademi sayfası) geri döner -->
+            <a href="{{ url_for('academy.academy_home') }}" class="btn btn-outline-secondary btn-sm mb-3"><i class="fas fa-arrow-left me-2"></i>Akademi'ye Geri Dön</a>
+            
+            <h1 class="display-5 fw-bold text-white">{{ course.title }}</h1>
+            <p class="lead text-muted col-lg-8">{{ course.description }}</p>
+            
+            <!-- Kurs Meta Bilgileri -->
+            <div class="d-flex flex-wrap align-items-center gap-4 mt-4 text-white">
+                <span><i class="fas fa-chalkboard-teacher me-2 text-primary"></i>Eğitmen: <strong>{{ course.instructor_name or 'Kuwamedya Ekibi' }}</strong></span>
+                <span><i class="fas fa-signal me-2 text-primary"></i>Seviye: <strong>{{ course.difficulty }}</strong></span>
+                <!-- 
+                  GÜÇLENDİRME (v5.0): 'models.py' içindeki 'get_lesson_count()'
+                  yardımcı metodunu kullanarak ders sayısını alır.
+                -->
+                <span><i class="fas fa-book-open me-2 text-primary"></i>Ders Sayısı: <strong>{{ course.get_lesson_count() }}</strong></span>
+                <span><i class="far fa-clock me-2 text-primary"></i>Tahmini Süre: <strong>{{ course.duration_hours }} Saat</strong></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="container-fluid mt-5">
+        <div class="row g-5">
+            <!-- =================================================================== -->
+            <!-- 2. SOL SÜTUN - KURS MÜFREDATI (DERS LİSTESİ) -->
+            <!-- =================================================================== -->
+            <div class="col-lg-8">
+                <h3 class="fw-bold mb-4">Kurs Müfredatı</h3>
+                <div class="accordion" id="lessonAccordion">
+                    <div class="accordion-item bg-dark border-secondary">
+                        <h2 class="accordion-header">
+                            <button class="accordion-button bg-darker text-white fw-bold" type="button" data-bs-toggle="collapse" data-bs-target="#collapseLessons" aria-expanded="true">
+                                <i class="fas fa-list-ul me-2"></i> Dersler ({{ course.get_lesson_count() }} bölüm)
+                            </button>
+                        </h2>
+                        <div id="collapseLessons" class="accordion-collapse collapse show">
+                            <div class="list-group list-group-flush">
+                                <!-- Kursa bağlı dersler 'order' (sıra) özelliğine göre listelenir -->
+                                {% if course.lessons.all() %}
+                                    {% for lesson in course.lessons.order_by('order').all() %}
+                                    <!-- 
+                                      KOD TEMİZLİĞİ (DRY PRENSİBİ - v5.0):
+                                      Artık 'completed_lesson_ids' listesini string olarak kontrol
+                                      etmek yerine, doğrudan 'models.py' içindeki
+                                      'enrollment.is_lesson_completed(lesson.id)' metodunu kullanıyoruz.
+                                      Bu, çok daha temiz ve güçlü bir yöntemdir.
+                                    -->
+                                    {% set is_completed = enrollment and enrollment.is_lesson_completed(lesson.id) %}
+                                    
+                                    <!-- 
+                                      Kullanıcı kursa kayıtlı değilse ('enrollment' yoksa)
+                                      linkler 'disabled' (tıklanamaz) olur.
+                                    -->
+                                    <a href="{{ url_for('academy.lesson_view', lesson_id=lesson.id) if enrollment else '#' }}" 
+                                       class="list-group-item list-group-item-action bg-dark text-white p-3 d-flex justify-content-between align-items-center {% if not enrollment %}disabled{% endif %}">
+                                        
+                                        <div class="d-flex align-items-center">
+                                            <!-- 
+                                              AKILLI İKONLAR (v5.0 GÜÇLENDİRMESİ):
+                                              İkon, dersin durumuna VE tipine göre dinamik olarak değişir.
+                                            -->
+                                            
+                                            <!-- 1. Ders tamamlanmışsa: Onay ikonu -->
+                                            {% if is_completed %}
+                                                <i class="fas fa-check-circle fa-fw me-3 fs-5 text-success"></i>
+                                            <!-- 2. Ders tamamlanmamışsa: Ders tipine göre ikon -->
+                                            {% else %}
+                                                {% if lesson.lesson_type == 'Quiz' %}
+                                                    <i class="fas fa-vial-circle-check fa-fw me-3 fs-5 text-muted"></i>
+                                                {% elif lesson.lesson_type == 'Metin' %}
+                                                    <i class="fas fa-file-lines fa-fw me-3 fs-5 text-muted"></i>
+                                                {% else %} <!-- Varsayılan: Video -->
+                                                    <i class="far fa-play-circle fa-fw me-3 fs-5 text-muted"></i>
+                                                {% endif %}
+                                            {% endif %}
+                                            
+                                            <h6 class="mb-0 fw-bold">Ders {{ lesson.order }}: {{ lesson.title }}</h6>
+                                        </div>
+                                        
+                                        <!-- Ders tipini belirten küçük etiket -->
+                                        <span class="badge bg-secondary-subtle text-secondary-emphasis rounded-pill">{{ lesson.lesson_type }}</span>
+                                    </a>
+                                    {% endfor %}
+                                {% else %}
+                                    <div class="p-5 text-center empty-lessons-message">
+                                        <i class="fas fa-book-open fa-4x mb-3 text-muted opacity-50"></i>
+                                        <h5 class="text-muted mb-2">Bu kursa henüz ders eklenmemiş</h5>
+                                        <p class="text-muted small mb-0">Kurs içeriği yakında eklenecektir.</p>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- =================================================================== -->
+            <!-- 3. SAĞ SÜTUN - AKILLI AKSİYON KARTI (STICKY) -->
+            <!-- =================================================================== -->
+            <div class="col-lg-4">
+                <div class="card bg-dark border-secondary shadow-lg sticky-top" style="top: 100px;">
+                    {% set cover2 = course.cover_image or 'course_default.png' %}
+                    {% if cover2 and cover2.startswith('http') %}
+                        <img src="{{ cover2 }}" class="card-img-top" alt="{{ course.title }}">
+                    {% else %}
+                        <img src="{{ url_for('static', filename='images/courses/' + cover2) }}" class="card-img-top" alt="{{ course.title }}">
+                    {% endif %}
+                    <div class="card-body p-4">
+                        
+                        <!-- AKILLI BUTON/İLERLEME ALANI -->
+                        
+                        <!-- A. KULLANICI KURSA KAYITLIYSA -->
+                        {% if enrollment %}
+                            <!-- 
+                              'models.py' içindeki 'enrollment.get_progress()'
+                              metodunu çağırarak ilerleme yüzdesini alırız.
+                            -->
+                            {% set progress = enrollment.get_progress() %}
+                            
+                            <!-- A.1. Kursu bitirmişse -->
+                            {% if progress == 100 %}
+                                <div class="text-center">
+                                    <i class="fas fa-trophy fa-2x text-warning mb-2"></i>
+                                    <h5 class="text-white">Kurs Tamamlandı!</h5>
+                                </div>
+                            
+                            <!-- A.2. Kursa devam ediyorsa -->
+                            {% else %}
+                                <!-- 
+                                  AKILLI "DEVAM ET" MANTIĞI (v5.0 GÜÇLENDİRMESİ):
+                                  Jinja2 'namespace' kullanarak bir değişken oluştururuz.
+                                  Ders listesinde döner, 'is_lesson_completed' metoduyla
+                                  tamamlanmamış İLK dersi bulur ve değişkene atarız.
+                                -->
+                                {% set next_lesson_to_take = namespace(value=None) %}
+                                {% for l in course.lessons.order_by('order').all() %}
+                                    {% if not next_lesson_to_take.value %}
+                                        {% if not enrollment.is_lesson_completed(l.id) %}
+                                            {% set next_lesson_to_take.value = l %}
+                                        {% endif %}
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                <a href="{{ url_for('academy.lesson_view', lesson_id=next_lesson_to_take.value.id) if next_lesson_to_take.value else '#' }}" class="btn btn-primary btn-lg w-100">
+                                    <i class="fas fa-play me-2"></i>
+                                    {% if progress > 0 %}Kursa Devam Et{% else %}Kursa Başla{% endif %}
+                                </a>
+                                
+                                <div class="mt-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1 small">
+                                        <span class="text-muted">İlerlemeniz:</span>
+                                        <span class="fw-bold">{{ progress }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar bg-success" role="progressbar" style="width: {{ progress }}%;"></div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                        <!-- B. KULLANICI KURSA KAYITLI DEĞİLSE -->
+                        {% else %}
+                            <!-- 
+                              Kullanıcıyı 'academy.enroll' rotasına (POST isteği ile)
+                              yönlendiren kayıt formunu gösteririz.
+                            -->
+                            <form method="POST" action="{{ url_for('academy.enroll', course_id=course.id) }}">
+                                <button type="submit" class="btn btn-success btn-lg w-100"><i class="fas fa-graduation-cap me-2"></i>Kursa Ücretsiz Katıl</button>
+                            </form>
+                        {% endif %}
+                        
+                        <hr class="border-secondary my-4">
+
+                        <h6 class="fw-bold mb-3">Bu Kursta Neler Var?</h6>
+                        <ul class="list-unstyled text-muted">
+                            <li class="mb-2"><i class="fas fa-file-video fa-fw me-2 text-primary"></i><strong>{{ course.get_lesson_count() }}</strong> bölüm ders</li>
+                            <li class="mb-2"><i class="fas fa-infinity fa-fw me-2 text-primary"></i>Ömür boyu tam erişim</li>
+                            <li class="mb-2"><i class="fas fa-mobile-alt fa-fw me-2 text-primary"></i>Mobil ve TV'den erişim</li>
+                            <li class="mb-2"><i class="fas fa-certificate fa-fw me-2 text-primary"></i>Bitirme sertifikası</li>
+                        </ul>
+                        
+                        {% if enrollment and enrollment.get_progress() == 100 %}
+                        <hr class="border-secondary my-4">
+                        <div class="text-center">
+                            <a href="{{ url_for('academy.download_certificate', course_id=course.id) }}" class="btn btn-success btn-lg w-100">
+                                <i class="fas fa-download me-2"></i>Bitirme Sertifikasını İndir (PDF)
+                            </a>
+                            <p class="text-muted small mt-2 mb-0">Kursu tamamladınız! Sertifikanızı indirebilirsiniz.</p>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
