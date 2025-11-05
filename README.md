@@ -251,7 +251,7 @@ Bu proje özel bir projedir. Tüm hakları saklıdır.
 
 ## 👤 İletişim
 
-Sorularınız için: [Email adresiniz]
+Sorularınız için: sahinyusufduhan@gmail.com
 
 ---
 
