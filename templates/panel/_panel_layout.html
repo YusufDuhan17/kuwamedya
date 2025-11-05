@@ -121,9 +121,18 @@ YENİLİKLER VE GÜÇLENDİRMELER (v6.0):
             <!-- Sidebar Alt Kullanıcı Bilgisi ve Çıkış -->
             <div class="sidebar-footer mt-auto">
                 <hr class="border-secondary">
-                <a href="{{ url_for('auth.logout') }}" class="sidebar-nav-link logout-link">
-                    <i class="fas fa-sign-out-alt fa-fw"></i><span>Güvenli Çıkış</span>
-                </a>
+                <ul class="list-unstyled">
+                    <li class="sidebar-nav-item">
+                        <a href="#" class="sidebar-nav-link" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                            <i class="fas fa-key fa-fw"></i><span>Şifre Değiştir</span>
+                        </a>
+                    </li>
+                    <li class="sidebar-nav-item">
+                        <a href="{{ url_for('auth.logout') }}" class="sidebar-nav-link logout-link">
+                            <i class="fas fa-sign-out-alt fa-fw"></i><span>Güvenli Çıkış</span>
+                        </a>
+                    </li>
+                </ul>
             </div>
         </div>
     </aside>
@@ -173,5 +182,59 @@ YENİLİKLER VE GÜÇLENDİRMELER (v6.0):
             {% block panel_content %}{% endblock %}
         </div>
     </main>
+</div>
+
+<!-- =================================================================== -->
+<!-- ŞİFRE DEĞİŞTİRME MODALI (Tüm Panel Sayfalarında Erişilebilir) -->
+<!-- =================================================================== -->
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content bg-dark text-white border-secondary">
+            <form method="POST" action="{{ url_for('admin.profile') }}" novalidate>
+                {{ change_password_form.hidden_tag() }}
+                <div class="modal-header border-secondary">
+                    <h5 class="modal-title"><i class="fas fa-shield-alt me-2 text-info"></i>Şifre Değiştir</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="alert alert-info mb-3">
+                        <i class="fas fa-info-circle me-2"></i>
+                        <small>Şifreniz en az 8 karakter olmalı ve büyük harf, küçük harf, rakam içermelidir.</small>
+                    </div>
+                    <div class="mb-3">
+                        {{ change_password_form.current_password.label(class="form-label") }}
+                        {{ change_password_form.current_password(class="form-control bg-darker border-secondary text-white", placeholder="Mevcut şifrenizi girin") }}
+                        {% if change_password_form.current_password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in change_password_form.current_password.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ change_password_form.new_password.label(class="form-label") }}
+                        {{ change_password_form.new_password(class="form-control bg-darker border-secondary text-white", placeholder="Yeni şifrenizi girin") }}
+                        {% if change_password_form.new_password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in change_password_form.new_password.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="mb-3">
+                        {{ change_password_form.confirm_new_password.label(class="form-label") }}
+                        {{ change_password_form.confirm_new_password(class="form-control bg-darker border-secondary text-white", placeholder="Yeni şifrenizi tekrar girin") }}
+                        {% if change_password_form.confirm_new_password.errors %}
+                            <div class="invalid-feedback d-block">
+                                {% for error in change_password_form.confirm_new_password.errors %}<span>{{ error }}</span>{% endfor %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+                <div class="modal-footer border-secondary">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                    {{ change_password_form.submit(class="btn btn-info", render_kw={'name': 'submit_password'}) }}
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}

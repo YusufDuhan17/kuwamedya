@@ -222,6 +222,15 @@ def register_request_handlers(app):
             
             session['next_url'] = request.url
 
+    @app.context_processor
+    def inject_password_form():
+        """Tüm panel sayfalarında şifre değiştirme formunu kullanılabilir yapar."""
+        from flask_login import current_user
+        if current_user.is_authenticated:
+            from forms import ChangePasswordForm
+            return {'change_password_form': ChangePasswordForm()}
+        return {'change_password_form': None}
+
     app.logger.info("Request handler'ları başarıyla kaydedildi.")
 
 
